@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "routes": [
+    { "src": "/images/(.*)", "dest": "/images/$1" },
+    { "src": "/", "dest": "/index.html" },
+    { "src": "/index.html", "dest": "/index.html" },
+    { "src": "/landing.html", "dest": "/landing.html" },
+    { "src": "/login.html", "dest": "/login.html" },
+    { "src": "/brand-dashboard.html", "dest": "/brand-dashboard.html" },
+    { "src": "/supplier-dashboard.html", "dest": "/supplier-dashboard.html" },
+    { "src": "/community.html", "dest": "/community.html" },
+    { "src": "/new-order.html", "dest": "/new-order.html" },
+    { "src": "/order-list.html", "dest": "/order-list.html" },
+    { "src": "/order-detail.html", "dest": "/order-detail.html" },
+    { "src": "/settlement.html", "dest": "/settlement.html" }
+  ]
+}
