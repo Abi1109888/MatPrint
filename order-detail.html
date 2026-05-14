@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>订单详情 · 材印达 MatPrint</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1DB954;--green2:#0EA847;--ink:#0D1117;--ink2:#1C2333;--ink3:#374151;
+  --white:#fff;--bg:#F0F2F5;--card:#fff;--border:rgba(0,0,0,0.07);
+  --muted:#6B7280;--muted2:#9CA3AF;--sidebar:240px;--radius:16px;
+}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+.sidebar{width:var(--sidebar);background:var(--ink2);display:flex;flex-direction:column;padding:0;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:24px 20px 20px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.06)}
+.sb-logo-icon{width:32px;height:32px;border-radius:9px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;flex-shrink:0}
+.sb-logo-cn{font-size:14px;font-weight:700;color:#fff}
+.sb-logo-en{font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:2px}
+.sb-user-card{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:10px}
+.sb-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.sb-uname{font-size:13px;font-weight:700;color:#fff}
+.sb-role-tag{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px}
+.sb-group{font-size:9px;font-weight:700;color:rgba(255,255,255,0.25);letter-spacing:2px;text-transform:uppercase;padding:16px 20px 6px}
+.sb-link{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.55);text-decoration:none;transition:all 0.18s;border-left:3px solid transparent}
+.sb-link:hover{color:#fff;background:rgba(255,255,255,0.05);border-left-color:rgba(255,255,255,0.2)}
+.sb-link.active{color:#fff;background:rgba(29,185,84,0.12);border-left-color:var(--green)}
+.si{width:16px;text-align:center;flex-shrink:0}
+.badge{margin-left:auto;background:#EF4444;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px}
+.soon{margin-left:auto;font-size:9px;color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.07);padding:1px 6px;border-radius:4px}
+.sb-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid rgba(255,255,255,0.06)}
+.sb-exit{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;transition:color 0.18s}
+.sb-exit:hover{color:#EF4444}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:56px;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:100}
+.topbar-breadcrumb{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.topbar-breadcrumb strong{color:var(--ink)}
+.sep{opacity:0.3}
+.content{padding:28px;flex:1}
+/* 卡片 */
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.card-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.card-title i{color:var(--green)}
+/* 订单头部 */
+.order-header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.order-id{font-size:11px;font-weight:700;color:var(--muted2);background:#F5F5F5;padding:3px 10px;border-radius:6px;margin-bottom:8px;display:inline-block}
+.order-title{font-size:20px;font-weight:900;color:var(--ink);letter-spacing:-0.5px;margin-bottom:6px}
+.order-meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.status-badge{font-size:12px;font-weight:700;padding:6px 16px;border-radius:20px}
+.s-wait{background:#FEF3C7;color:#92400E}
+/* 进度时间轴 */
+.timeline{display:flex;align-items:flex-start;gap:0;padding:8px 0}
+.tl-step{flex:1;display:flex;flex-direction:column;align-items:center;position:relative}
+.tl-step:not(:last-child)::after{content:'';position:absolute;top:16px;left:50%;width:100%;height:2px;background:var(--border);z-index:0}
+.tl-step.done:not(:last-child)::after{background:var(--green)}
+.tl-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;position:relative;z-index:1;flex-shrink:0}
+.tl-step.done .tl-dot{background:var(--green);color:#fff}
+.tl-step.current .tl-dot{background:#FEF3C7;color:#92400E;border:2px solid #F59E0B;animation:pulse 1.5s ease-in-out infinite}
+.tl-step.pending .tl-dot{background:#F5F5F5;color:var(--muted2);border:2px solid var(--border)}
+@keyframes pulse{0%,100%{box-shadow:0 0 0 0 rgba(245,158,11,0.3)}50%{box-shadow:0 0 0 6px rgba(245,158,11,0)}}
+.tl-label{font-size:11px;font-weight:600;color:var(--ink3);margin-top:8px;text-align:center}
+.tl-step.pending .tl-label{color:var(--muted2)}
+.tl-date{font-size:10px;color:var(--muted2);margin-top:2px;text-align:center}
+/* 详情网格 */
+.detail-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.detail-item{display:flex;flex-direction:column;gap:4px}
+.detail-label{font-size:10px;color:var(--muted2);font-weight:500;text-transform:uppercase;letter-spacing:0.5px}
+.detail-val{font-size:13px;font-weight:600;color:var(--ink3)}
+/* 供应商卡片 */
+.supplier-card{display:flex;align-items:center;gap:16px;padding:16px;background:#FAFBFC;border-radius:12px;border:1px solid var(--border)}
+.sup-ava{width:48px;height:48px;border-radius:12px;background:linear-gradient(135deg,var(--green),var(--green2));display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:700;color:#fff;flex-shrink:0}
+.sup-info{flex:1}
+.sup-name{font-size:14px;font-weight:700;color:var(--ink)}
+.sup-meta{font-size:12px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:10px}
+.sup-rating{display:flex;align-items:center;gap:4px;font-size:12px;font-weight:700;color:#F59E0B}
+.sup-actions{display:flex;gap:8px}
+.btn-chat{background:var(--green);border:none;color:#fff;font-size:12px;font-weight:700;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-chat:hover{background:var(--green2)}
+.btn-outline{background:transparent;border:1.5px solid var(--border);color:var(--muted);font-size:12px;font-weight:600;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-outline:hover{border-color:var(--ink);color:var(--ink)}
+/* 确认打样区 */
+.confirm-banner{background:linear-gradient(135deg,#FFFBEB,#FEF3C7);border:1.5px solid #F59E0B;border-radius:12px;padding:20px 24px;display:flex;align-items:center;gap:16px}
+.confirm-banner i{font-size:24px;color:#F59E0B;flex-shrink:0}
+.confirm-body{flex:1}
+.confirm-title{font-size:14px;font-weight:700;color:#92400E;margin-bottom:4px}
+.confirm-desc{font-size:12px;color:#A16207;line-height:1.6}
+.confirm-actions{display:flex;gap:8px;flex-shrink:0}
+.btn-confirm{background:#F59E0B;border:none;color:#fff;font-size:13px;font-weight:700;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-confirm:hover{background:#D97706}
+.btn-reject{background:transparent;border:1.5px solid #F59E0B;color:#92400E;font-size:13px;font-weight:600;padding:10px 20px;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-reject:hover{background:#FEF3C7}
+/* 费用明细 */
+.fee-row{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.05);font-size:13px}
+.fee-row:last-child{border-bottom:none;font-weight:700;font-size:15px;color:var(--ink)}
+.fee-label{color:var(--ink3)}
+.fee-val{font-weight:600;color:var(--ink)}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="landing.html" class="sb-logo">
+    <div class="sb-logo-icon">M</div>
+    <div><div class="sb-logo-cn">材印达</div><div class="sb-logo-en">MatPrint</div></div>
+  </a>
+  <div class="sb-user-card">
+    <div class="sb-ava">李</div>
+    <div><div class="sb-uname">李明华</div><div class="sb-role-tag"><i class="fa-solid fa-circle-check" style="font-size:8px"></i> 品牌方账号</div></div>
+  </div>
+  <div class="sb-group">社区</div>
+  <a href="community.html" class="sb-link"><i class="si fa-solid fa-fire" style="color:#F97316"></i> 创意社区</a>
+  <div class="sb-group">工作台</div>
+  <a href="brand-dashboard.html" class="sb-link"><i class="si fa-solid fa-gauge-high"></i> 控制台</a>
+  <a href="new-order.html" class="sb-link"><i class="si fa-solid fa-circle-plus"></i> 发布需求</a>
+  <a href="order-list.html" class="sb-link active"><i class="si fa-solid fa-list-check"></i> 我的订单<span class="badge">3</span></a>
+  <div class="sb-group">采购</div>
+  <a href="#" class="sb-link" onclick="alert('供应商市场即将上线')"><i class="si fa-solid fa-store"></i> 供应商市场<span class="soon">即将上线</span></a>
+  <a href="#" class="sb-link" onclick="alert('收藏功能开发中')"><i class="si fa-solid fa-heart"></i> 收藏供应商</a>
+  <a href="#" class="sb-link" onclick="alert('报价管理开发中')"><i class="si fa-solid fa-file-invoice-dollar"></i> 报价管理</a>
+  <div class="sb-group">财务</div>
+  <a href="settlement.html" class="sb-link"><i class="si fa-solid fa-wallet"></i> 结算中心</a>
+  <a href="#" class="sb-link" onclick="alert('发票管理开发中')"><i class="si fa-solid fa-receipt"></i> 发票管理</a>
+  <div class="sb-group">账号</div>
+  <a href="#" class="sb-link" onclick="alert('账号设置开发中')"><i class="si fa-solid fa-gear"></i> 账号设置</a>
+  <div class="sb-bottom">
+    <a href="login.html" class="sb-exit"><i class="fa-solid fa-right-from-bracket"></i> 退出登录</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-breadcrumb">
+      <span>材印达</span><span class="sep">/</span>
+      <a href="brand-dashboard.html" style="color:var(--muted);text-decoration:none">工作台</a>
+      <span class="sep">/</span>
+      <a href="order-list.html" style="color:var(--muted);text-decoration:none">我的订单</a>
+      <span class="sep">/</span><strong>ORD-2025-002</strong>
+    </div>
+    <a href="order-list.html" style="font-size:12px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:4px"><i class="fa-solid fa-arrow-left"></i> 返回列表</a>
+  </div>
+
+  <div class="content">
+    <!-- 确认打样提示 -->
+    <div class="confirm-banner" style="margin-bottom:20px">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+      <div class="confirm-body">
+        <div class="confirm-title">打样已完成，请确认</div>
+        <div class="confirm-desc">广州展博展示已完成打样，请在 <strong>24小时内</strong> 确认。超时将自动通过，进入生产阶段。</div>
+      </div>
+      <div class="confirm-actions">
+        <button class="btn-confirm" onclick="confirmSample()"><i class="fa-solid fa-check"></i> 确认打样</button>
+        <button class="btn-reject" onclick="rejectSample()"><i class="fa-solid fa-xmark"></i> 要求修改</button>
+      </div>
+    </div>
+
+    <!-- 订单信息 -->
+    <div class="card">
+      <div class="order-header">
+        <div>
+          <div class="order-id">ORD-2025-002</div>
+          <div class="order-title">品牌年会 · 展台搭建 3×6m</div>
+          <div class="order-meta">
+            <span><i class="fa-regular fa-calendar"></i> 下单时间：2025-05-28</span>
+            <span><i class="fa-solid fa-location-dot"></i> 交付城市：广州</span>
+            <span><i class="fa-regular fa-calendar-check"></i> 期望交付：2025-06-25</span>
+          </div>
+        </div>
+        <span class="status-badge s-wait">⚠️ 待确认打样</span>
+      </div>
+    </div>
+
+    <!-- 生产进度 -->
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-timeline"></i> 生产进度</div>
+      <div class="timeline">
+        <div class="tl-step done">
+          <div class="tl-dot"><i class="fa-solid fa-check"></i></div>
+          <div class="tl-label">需求确认</div>
+          <div class="tl-date">05-28</div>
+        </div>
+        <div class="tl-step done">
+          <div class="tl-dot"><i class="fa-solid fa-check"></i></div>
+          <div class="tl-label">AI匹配</div>
+          <div class="tl-date">05-29</div>
+        </div>
+        <div class="tl-step done">
+          <div class="tl-dot"><i class="fa-solid fa-check"></i></div>
+          <div class="tl-label">报价确认</div>
+          <div class="tl-date">05-30</div>
+        </div>
+        <div class="tl-step current">
+          <div class="tl-dot"><i class="fa-solid fa-hammer"></i></div>
+          <div class="tl-label">打样确认</div>
+          <div class="tl-date">待确认</div>
+        </div>
+        <div class="tl-step pending">
+          <div class="tl-dot"><i class="fa-solid fa-industry"></i></div>
+          <div class="tl-label">批量生产</div>
+          <div class="tl-date">-</div>
+        </div>
+        <div class="tl-step pending">
+          <div class="tl-dot"><i class="fa-solid fa-truck"></i></div>
+          <div class="tl-label">发货物流</div>
+          <div class="tl-date">-</div>
+        </div>
+        <div class="tl-step pending">
+          <div class="tl-dot"><i class="fa-solid fa-box-open"></i></div>
+          <div class="tl-label">验收完成</div>
+          <div class="tl-date">-</div>
+        </div>
+      </div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <!-- 需求详情 -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-file-lines"></i> 需求详情</div>
+        <div class="detail-grid" style="grid-template-columns:1fr 1fr;margin-bottom:16px">
+          <div class="detail-item"><div class="detail-label">品类</div><div class="detail-val">展台搭建</div></div>
+          <div class="detail-item"><div class="detail-label">规格</div><div class="detail-val">3m × 6m</div></div>
+          <div class="detail-item"><div class="detail-label">预算</div><div class="detail-val">2-5万</div></div>
+          <div class="detail-item"><div class="detail-label">数量</div><div class="detail-val">1套</div></div>
+        </div>
+        <div class="detail-item">
+          <div class="detail-label" style="margin-bottom:6px">需求描述</div>
+          <div style="font-size:13px;color:var(--ink3);line-height:1.7;background:#FAFBFC;border-radius:8px;padding:12px">品牌年会展台搭建，3×6m开放式展台，需包含背景板、地台、展示柜×2、LED灯带，风格简洁现代，主色调绿白色。</div>
+        </div>
+      </div>
+
+      <!-- 费用明细 -->
+      <div class="card">
+        <div class="card-title"><i class="fa-solid fa-receipt"></i> 费用明细</div>
+        <div class="fee-row"><span class="fee-label">展台主体搭建</span><span class="fee-val">¥18,000</span></div>
+        <div class="fee-row"><span class="fee-label">背景板喷绘印刷</span><span class="fee-val">¥3,200</span></div>
+        <div class="fee-row"><span class="fee-label">LED灯带安装</span><span class="fee-val">¥2,800</span></div>
+        <div class="fee-row"><span class="fee-label">运输安装费</span><span class="fee-val">¥2,500</span></div>
+        <div class="fee-row"><span class="fee-label">平台服务费 (7%)</span><span class="fee-val">¥1,855</span></div>
+        <div class="fee-row"><span class="fee-label" style="font-size:15px;font-weight:700">合计</span><span class="fee-val" style="color:var(--green);font-size:18px">¥28,355</span></div>
+      </div>
+    </div>
+
+    <!-- 供应商信息 -->
+    <div class="card">
+      <div class="card-title"><i class="fa-solid fa-industry"></i> 供应商信息</div>
+      <div class="supplier-card">
+        <div class="sup-ava">展</div>
+        <div class="sup-info">
+          <div class="sup-name">广州展博展示工程有限公司</div>
+          <div class="sup-meta">
+            <span><i class="fa-solid fa-location-dot"></i> 广州天河区</span>
+            <span><i class="fa-solid fa-box"></i> 已完成 128 单</span>
+            <span class="sup-rating"><i class="fa-solid fa-star"></i> 4.9 / 5.0</span>
+            <span style="background:#D1FAE5;color:#065F46;font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px">S级供应商</span>
+          </div>
+        </div>
+        <div class="sup-actions">
+          <button class="btn-chat" onclick="alert('联系供应商：微信 zhanbo_display\n电话：020-88888888')"><i class="fa-solid fa-comment"></i> 联系TA</button>
+          <button class="btn-outline" onclick="alert('供应商主页开发中')"><i class="fa-solid fa-store"></i> 主页</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function confirmSample() {
+  if (confirm('确认打样通过？确认后将进入批量生产阶段。')) {
+    alert('✅ 打样已确认！\n\n供应商将立即开始批量生产，预计 2025-06-25 完成交付。');
+    window.location.href = 'order-list.html';
+  }
+}
+function rejectSample() {
+  const reason = prompt('请描述需要修改的内容：');
+  if (reason) {
+    alert('✅ 修改意见已提交！\n\n供应商将在 24 小时内重新打样。');
+  }
+}
+// 进度条动画
+window.addEventListener('load', () => {
+  document.querySelectorAll('.oc-fill').forEach(el => {
+    const w = el.style.width; el.style.width = '0';
+    setTimeout(() => { el.style.width = w; }, 200);
+  });
+});
+</script>
+</body>
+</html>

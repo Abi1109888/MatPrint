@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>我的订单 · 材印达 MatPrint</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1DB954;--green2:#0EA847;--ink:#0D1117;--ink2:#1C2333;--ink3:#374151;
+  --white:#fff;--bg:#F0F2F5;--card:#fff;--border:rgba(0,0,0,0.07);
+  --muted:#6B7280;--muted2:#9CA3AF;--sidebar:240px;--radius:16px;
+}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+.sidebar{width:var(--sidebar);background:var(--ink2);display:flex;flex-direction:column;padding:0;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:24px 20px 20px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.06)}
+.sb-logo-icon{width:32px;height:32px;border-radius:9px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;flex-shrink:0}
+.sb-logo-cn{font-size:14px;font-weight:700;color:#fff}
+.sb-logo-en{font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:2px}
+.sb-user-card{padding:16px 20px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:10px}
+.sb-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.sb-uname{font-size:13px;font-weight:700;color:#fff}
+.sb-role-tag{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px}
+.sb-group{font-size:9px;font-weight:700;color:rgba(255,255,255,0.25);letter-spacing:2px;text-transform:uppercase;padding:16px 20px 6px}
+.sb-link{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.55);text-decoration:none;transition:all 0.18s;border-left:3px solid transparent;position:relative}
+.sb-link:hover{color:#fff;background:rgba(255,255,255,0.05);border-left-color:rgba(255,255,255,0.2)}
+.sb-link.active{color:#fff;background:rgba(29,185,84,0.12);border-left-color:var(--green)}
+.si{width:16px;text-align:center;flex-shrink:0}
+.badge{margin-left:auto;background:#EF4444;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px}
+.soon{margin-left:auto;font-size:9px;color:rgba(255,255,255,0.3);background:rgba(255,255,255,0.07);padding:1px 6px;border-radius:4px}
+.sb-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid rgba(255,255,255,0.06)}
+.sb-exit{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;transition:color 0.18s}
+.sb-exit:hover{color:#EF4444}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:56px;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:100}
+.topbar-breadcrumb{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.topbar-breadcrumb strong{color:var(--ink)}
+.sep{opacity:0.3}
+.content{padding:28px;flex:1}
+/* 筛选栏 */
+.filter-bar{display:flex;align-items:center;gap:10px;margin-bottom:20px;flex-wrap:wrap}
+.filter-tab{font-size:12px;font-weight:600;padding:7px 16px;border-radius:20px;border:1.5px solid var(--border);background:#fff;color:var(--muted);cursor:pointer;transition:all 0.18s;font-family:inherit}
+.filter-tab:hover{border-color:var(--ink);color:var(--ink)}
+.filter-tab.active{background:var(--ink);border-color:var(--ink);color:#fff}
+.filter-right{margin-left:auto;display:flex;gap:8px}
+.btn-new-order{background:var(--green);border:none;color:#fff;font-size:13px;font-weight:700;padding:8px 20px;border-radius:10px;cursor:pointer;font-family:inherit;transition:all 0.2s;text-decoration:none;display:inline-flex;align-items:center;gap:6px}
+.btn-new-order:hover{background:var(--green2)}
+/* 订单卡片 */
+.order-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:20px 24px;margin-bottom:12px;cursor:pointer;transition:all 0.2s;text-decoration:none;color:inherit;display:block;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.order-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,0.08);border-color:rgba(29,185,84,0.2)}
+.oc-head{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.oc-id{font-size:11px;font-weight:700;color:var(--muted2);background:#F5F5F5;padding:3px 10px;border-radius:6px}
+.oc-title{font-size:14px;font-weight:700;color:var(--ink);flex:1}
+.oc-status{font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;flex-shrink:0}
+.s-prod{background:#DBEAFE;color:#1D4ED8}
+.s-wait{background:#FEF3C7;color:#92400E}
+.s-check{background:#EDE9FE;color:#6D28D9}
+.s-done{background:#D1FAE5;color:#065F46}
+.s-cancel{background:#FEE2E2;color:#991B1B}
+.oc-body{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:14px}
+.oc-field{display:flex;flex-direction:column;gap:3px}
+.oc-label{font-size:10px;color:var(--muted2);font-weight:500}
+.oc-val{font-size:13px;font-weight:600;color:var(--ink3)}
+.oc-prog{display:flex;align-items:center;gap:10px}
+.oc-bar{flex:1;height:4px;background:#F0F0F0;border-radius:2px;overflow:hidden}
+.oc-fill{height:100%;border-radius:2px;transition:width 1s ease}
+.oc-pct{font-size:11px;font-weight:700;min-width:28px;text-align:right}
+.oc-foot{display:flex;align-items:center;justify-content:space-between;padding-top:14px;border-top:1px solid rgba(0,0,0,0.05)}
+.oc-supplier{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:5px}
+.oc-amount{font-size:16px;font-weight:900;color:var(--ink);letter-spacing:-0.5px}
+/* 空状态 */
+.empty{text-align:center;padding:60px 20px;color:var(--muted)}
+.empty i{font-size:40px;margin-bottom:16px;opacity:0.3}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="landing.html" class="sb-logo">
+    <div class="sb-logo-icon">M</div>
+    <div><div class="sb-logo-cn">材印达</div><div class="sb-logo-en">MatPrint</div></div>
+  </a>
+  <div class="sb-user-card">
+    <div class="sb-ava">李</div>
+    <div><div class="sb-uname">李明华</div><div class="sb-role-tag"><i class="fa-solid fa-circle-check" style="font-size:8px"></i> 品牌方账号</div></div>
+  </div>
+  <div class="sb-group">社区</div>
+  <a href="community.html" class="sb-link"><i class="si fa-solid fa-fire" style="color:#F97316"></i> 创意社区</a>
+  <div class="sb-group">工作台</div>
+  <a href="brand-dashboard.html" class="sb-link"><i class="si fa-solid fa-gauge-high"></i> 控制台</a>
+  <a href="new-order.html" class="sb-link"><i class="si fa-solid fa-circle-plus"></i> 发布需求</a>
+  <a href="order-list.html" class="sb-link active"><i class="si fa-solid fa-list-check"></i> 我的订单<span class="badge">3</span></a>
+  <div class="sb-group">采购</div>
+  <a href="#" class="sb-link" onclick="alert('供应商市场即将上线')"><i class="si fa-solid fa-store"></i> 供应商市场<span class="soon">即将上线</span></a>
+  <a href="#" class="sb-link" onclick="alert('收藏功能开发中')"><i class="si fa-solid fa-heart"></i> 收藏供应商</a>
+  <a href="#" class="sb-link" onclick="alert('报价管理开发中')"><i class="si fa-solid fa-file-invoice-dollar"></i> 报价管理</a>
+  <div class="sb-group">财务</div>
+  <a href="settlement.html" class="sb-link"><i class="si fa-solid fa-wallet"></i> 结算中心</a>
+  <a href="#" class="sb-link" onclick="alert('发票管理开发中')"><i class="si fa-solid fa-receipt"></i> 发票管理</a>
+  <div class="sb-group">账号</div>
+  <a href="#" class="sb-link" onclick="alert('账号设置开发中')"><i class="si fa-solid fa-gear"></i> 账号设置</a>
+  <div class="sb-bottom">
+    <a href="login.html" class="sb-exit"><i class="fa-solid fa-right-from-bracket"></i> 退出登录</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-breadcrumb">
+      <span>材印达</span><span class="sep">/</span>
+      <a href="brand-dashboard.html" style="color:var(--muted);text-decoration:none">工作台</a>
+      <span class="sep">/</span><strong>我的订单</strong>
+    </div>
+    <a href="new-order.html" class="btn-new-order"><i class="fa-solid fa-plus"></i> 发布新需求</a>
+  </div>
+
+  <div class="content">
+    <div class="filter-bar">
+      <button class="filter-tab active" onclick="filterOrders(this,'all')">全部订单 <span style="opacity:0.5">5</span></button>
+      <button class="filter-tab" onclick="filterOrders(this,'prod')">生产中 <span style="opacity:0.5">2</span></button>
+      <button class="filter-tab" onclick="filterOrders(this,'wait')">待确认 <span style="opacity:0.5">1</span></button>
+      <button class="filter-tab" onclick="filterOrders(this,'check')">验收中 <span style="opacity:0.5">1</span></button>
+      <button class="filter-tab" onclick="filterOrders(this,'done')">已完成 <span style="opacity:0.5">1</span></button>
+    </div>
+
+    <div id="orderList">
+      <a href="order-detail.html" class="order-card" data-status="prod">
+        <div class="oc-head">
+          <span class="oc-id">ORD-2025-001</span>
+          <span class="oc-title">2025深圳车展 · 大型喷绘背景板 × 8张</span>
+          <span class="oc-status s-prod">生产中</span>
+        </div>
+        <div class="oc-body">
+          <div class="oc-field"><div class="oc-label">品类</div><div class="oc-val">大幅面喷绘</div></div>
+          <div class="oc-field"><div class="oc-label">数量</div><div class="oc-val">8 张</div></div>
+          <div class="oc-field"><div class="oc-label">交付日期</div><div class="oc-val">2025-06-18</div></div>
+          <div class="oc-field"><div class="oc-label">交付城市</div><div class="oc-val">深圳</div></div>
+        </div>
+        <div class="oc-prog" style="margin-bottom:14px">
+          <div class="oc-bar"><div class="oc-fill" style="width:75%;background:#1DB954"></div></div>
+          <div class="oc-pct" style="color:#1DB954">75%</div>
+        </div>
+        <div class="oc-foot">
+          <span class="oc-supplier"><i class="fa-solid fa-industry"></i> 深圳星辰印刷科技</span>
+          <span class="oc-amount">¥12,800</span>
+        </div>
+      </a>
+
+      <a href="order-detail.html" class="order-card" data-status="wait">
+        <div class="oc-head">
+          <span class="oc-id">ORD-2025-002</span>
+          <span class="oc-title">品牌年会 · 展台搭建 3×6m</span>
+          <span class="oc-status s-wait">⚠️ 待确认打样</span>
+        </div>
+        <div class="oc-body">
+          <div class="oc-field"><div class="oc-label">品类</div><div class="oc-val">展台搭建</div></div>
+          <div class="oc-field"><div class="oc-label">规格</div><div class="oc-val">3×6m</div></div>
+          <div class="oc-field"><div class="oc-label">交付日期</div><div class="oc-val">2025-06-25</div></div>
+          <div class="oc-field"><div class="oc-label">交付城市</div><div class="oc-val">广州</div></div>
+        </div>
+        <div class="oc-prog" style="margin-bottom:14px">
+          <div class="oc-bar"><div class="oc-fill" style="width:30%;background:#F59E0B"></div></div>
+          <div class="oc-pct" style="color:#F59E0B">30%</div>
+        </div>
+        <div class="oc-foot">
+          <span class="oc-supplier"><i class="fa-solid fa-industry"></i> 广州展博展示</span>
+          <span class="oc-amount">¥28,500</span>
+        </div>
+      </a>
+
+      <a href="order-detail.html" class="order-card" data-status="check">
+        <div class="oc-head">
+          <span class="oc-id">ORD-2025-003</span>
+          <span class="oc-title">新品上市 · UV印刷礼盒包装 × 500套</span>
+          <span class="oc-status s-check">验收中</span>
+        </div>
+        <div class="oc-body">
+          <div class="oc-field"><div class="oc-label">品类</div><div class="oc-val">包装印刷</div></div>
+          <div class="oc-field"><div class="oc-label">数量</div><div class="oc-val">500 套</div></div>
+          <div class="oc-field"><div class="oc-label">交付日期</div><div class="oc-val">2025-07-02</div></div>
+          <div class="oc-field"><div class="oc-label">交付城市</div><div class="oc-val">上海</div></div>
+        </div>
+        <div class="oc-prog" style="margin-bottom:14px">
+          <div class="oc-bar"><div class="oc-fill" style="width:95%;background:#7C3AED"></div></div>
+          <div class="oc-pct" style="color:#7C3AED">95%</div>
+        </div>
+        <div class="oc-foot">
+          <span class="oc-supplier"><i class="fa-solid fa-industry"></i> 东莞彩印科技</span>
+          <span class="oc-amount">¥9,600</span>
+        </div>
+      </a>
+
+      <a href="order-detail.html" class="order-card" data-status="prod">
+        <div class="oc-head">
+          <span class="oc-id">ORD-2025-004</span>
+          <span class="oc-title">门店改造 · 文化墙设计制作 × 3面</span>
+          <span class="oc-status s-prod">生产中</span>
+        </div>
+        <div class="oc-body">
+          <div class="oc-field"><div class="oc-label">品类</div><div class="oc-val">文化墙</div></div>
+          <div class="oc-field"><div class="oc-label">数量</div><div class="oc-val">3 面</div></div>
+          <div class="oc-field"><div class="oc-label">交付日期</div><div class="oc-val">2025-07-15</div></div>
+          <div class="oc-field"><div class="oc-label">交付城市</div><div class="oc-val">北京</div></div>
+        </div>
+        <div class="oc-prog" style="margin-bottom:14px">
+          <div class="oc-bar"><div class="oc-fill" style="width:45%;background:#1DB954"></div></div>
+          <div class="oc-pct" style="color:#1DB954">45%</div>
+        </div>
+        <div class="oc-foot">
+          <span class="oc-supplier"><i class="fa-solid fa-industry"></i> 北京创艺广告</span>
+          <span class="oc-amount">¥15,200</span>
+        </div>
+      </a>
+
+      <a href="order-detail.html" class="order-card" data-status="done">
+        <div class="oc-head">
+          <span class="oc-id">ORD-2025-005</span>
+          <span class="oc-title">春季促销 · 易拉宝 × 50支</span>
+          <span class="oc-status s-done">✓ 已完成</span>
+        </div>
+        <div class="oc-body">
+          <div class="oc-field"><div class="oc-label">品类</div><div class="oc-val">易拉宝/展架</div></div>
+          <div class="oc-field"><div class="oc-label">数量</div><div class="oc-val">50 支</div></div>
+          <div class="oc-field"><div class="oc-label">完成日期</div><div class="oc-val">2025-05-20</div></div>
+          <div class="oc-field"><div class="oc-label">评分</div><div class="oc-val">⭐ 4.9 / 5</div></div>
+        </div>
+        <div class="oc-prog" style="margin-bottom:14px">
+          <div class="oc-bar"><div class="oc-fill" style="width:100%;background:#10B981"></div></div>
+          <div class="oc-pct" style="color:#10B981">100%</div>
+        </div>
+        <div class="oc-foot">
+          <span class="oc-supplier"><i class="fa-solid fa-industry"></i> 深圳星辰印刷科技</span>
+          <span class="oc-amount">¥4,250</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+
+<script>
+function filterOrders(btn, status) {
+  document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.order-card').forEach(card => {
+    if (status === 'all' || card.dataset.status === status) {
+      card.style.display = 'block';
+    } else {
+      card.style.display = 'none';
+    }
+  });
+}
+window.addEventListener('load', () => {
+  document.querySelectorAll('.oc-fill').forEach(el => {
+    const w = el.style.width; el.style.width = '0';
+    setTimeout(() => { el.style.width = w; }, 200);
+  });
+});
+</script>
+</body>
+</html>
