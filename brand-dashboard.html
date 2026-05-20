@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>运营控制台 · 材印达 MatPrint</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.6.0/echarts.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1DB954;--green2:#0EA847;--green3:#00C853;
+  --accent:#FF6B35;--accent2:#FFB800;
+  --purple:#7C3AED;--blue:#2563EB;--red:#EF4444;--orange:#F97316;
+  --ink:#0D1117;--ink2:#1C2333;--ink3:#374151;
+  --white:#FFFFFF;--bg:#F0F2F5;--card:#FFFFFF;
+  --border:rgba(0,0,0,0.07);--muted:#6B7280;--muted2:#9CA3AF;
+  --sidebar:240px;--radius:16px;
+  --shadow:0 2px 12px rgba(0,0,0,0.06),0 1px 3px rgba(0,0,0,0.04);
+  --shadow-hover:0 12px 40px rgba(0,0,0,0.12),0 4px 12px rgba(0,0,0,0.06);
+}
+body{font-family:'Noto Sans SC',system-ui,sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;background:radial-gradient(ellipse 800px 600px at 80% -10%,rgba(29,185,84,0.05) 0%,transparent 70%),radial-gradient(ellipse 600px 500px at -5% 60%,rgba(37,99,235,0.03) 0%,transparent 70%);pointer-events:none;z-index:0}
+
+/* ── 侧边栏 ── */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--ink2);display:flex;flex-direction:column;position:fixed;left:0;top:0;bottom:0;z-index:100;overflow-y:auto;overflow-x:hidden}
+.sb-logo{padding:24px 20px 20px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,255,255,0.06);text-decoration:none}
+.sb-logo-icon{width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,var(--green),var(--green2));display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;color:#fff;flex-shrink:0;box-shadow:0 4px 12px rgba(29,185,84,0.4)}
+.sb-logo-cn{font-size:15px;font-weight:800;color:#fff;letter-spacing:-0.3px}
+.sb-logo-en{font-size:9px;color:rgba(255,255,255,0.3);letter-spacing:3px;text-transform:uppercase;margin-top:1px}
+.sb-user-card{margin:12px 12px 4px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08);border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px}
+.sb-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--blue));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:#fff;flex-shrink:0}
+.sb-uname{font-size:13px;font-weight:700;color:#fff}
+.sb-role-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;color:var(--accent2);background:rgba(255,184,0,0.12);border:1px solid rgba(255,184,0,0.2);padding:2px 7px;border-radius:6px;margin-top:3px;letter-spacing:0.5px}
+.sb-group{padding:18px 16px 6px;font-size:9px;font-weight:800;color:rgba(255,255,255,0.2);letter-spacing:2.5px;text-transform:uppercase}
+.sb-link{display:flex;align-items:center;gap:10px;padding:9px 12px;margin:1px 8px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:500;color:rgba(255,255,255,0.5);transition:all 0.2s;position:relative}
+.sb-link:hover{background:rgba(255,255,255,0.07);color:rgba(255,255,255,0.9)}
+.sb-link.active{background:linear-gradient(135deg,rgba(29,185,84,0.18),rgba(29,185,84,0.08));color:var(--green);font-weight:700;border:1px solid rgba(29,185,84,0.2)}
+.sb-link.active::before{content:'';position:absolute;left:-8px;top:50%;transform:translateY(-50%);width:3px;height:18px;background:var(--green);border-radius:0 3px 3px 0}
+.sb-link .si{width:18px;text-align:center;font-size:13px;flex-shrink:0}
+.sb-link .badge{margin-left:auto;background:#EF4444;color:#fff;font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px}
+.sb-bottom{margin-top:auto;padding:14px;border-top:1px solid rgba(255,255,255,0.06)}
+.sb-exit{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;text-decoration:none;font-size:12px;font-weight:500;color:rgba(255,255,255,0.3);transition:all 0.2s;cursor:pointer}
+.sb-exit:hover{color:rgba(255,100,100,0.8);background:rgba(255,100,100,0.08)}
+
+/* ── 主区域 ── */
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh;position:relative;z-index:1}
+.topbar{background:rgba(255,255,255,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(0,0,0,0.06);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 36px;position:sticky;top:0;z-index:50}
+.topbar-breadcrumb{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+.topbar-breadcrumb strong{color:var(--ink);font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.tb-icon-btn{width:36px;height:36px;border-radius:10px;border:1px solid rgba(0,0,0,0.08);background:rgba(255,255,255,0.8);display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);font-size:14px;position:relative;transition:all 0.2s}
+.tb-icon-btn:hover{border-color:var(--green);color:var(--green);background:#fff}
+.tb-dot{position:absolute;top:7px;right:7px;width:6px;height:6px;background:#EF4444;border-radius:50%;border:1.5px solid #fff}
+.btn-new{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,var(--green),var(--green2));border:none;color:#fff;font-size:13px;font-weight:700;font-family:inherit;padding:9px 20px;border-radius:10px;cursor:pointer;transition:all 0.25s;text-decoration:none;box-shadow:0 4px 14px rgba(29,185,84,0.35)}
+.btn-new:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(29,185,84,0.45)}
+.content{padding:28px 36px;flex:1}
+
+/* ── Hero Banner（运营者版）── */
+.hero-banner{background:linear-gradient(135deg,#0D1117 0%,#1a1a2e 40%,#16213e 70%,#0f3460 100%);border-radius:20px;padding:28px 36px;margin-bottom:24px;position:relative;overflow:hidden;display:flex;align-items:center;justify-content:space-between}
+.hero-banner::before{content:'';position:absolute;top:-80px;right:-80px;width:320px;height:320px;background:radial-gradient(circle,rgba(255,184,0,0.12) 0%,transparent 70%);pointer-events:none}
+.hero-banner::after{content:'';position:absolute;bottom:-40px;left:25%;width:200px;height:200px;background:radial-gradient(circle,rgba(29,185,84,0.1) 0%,transparent 70%);pointer-events:none}
+.hero-left{position:relative;z-index:1}
+.hero-tag{display:inline-flex;align-items:center;gap:6px;background:rgba(255,184,0,0.15);border:1px solid rgba(255,184,0,0.25);color:var(--accent2);font-size:11px;font-weight:700;padding:4px 12px;border-radius:20px;margin-bottom:14px;letter-spacing:0.5px}
+.hero-hi{font-size:24px;font-weight:900;color:#fff;letter-spacing:-0.8px;line-height:1.2;margin-bottom:8px}
+.hero-hi em{font-style:normal;background:linear-gradient(90deg,var(--accent2),#FFD700);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero-sub{font-size:13px;color:rgba(255,255,255,0.5);line-height:1.7;max-width:420px}
+.hero-sub strong{color:rgba(255,255,255,0.85);font-weight:700}
+.hero-actions{display:flex;align-items:center;gap:10px;margin-top:18px}
+.hero-btn-primary{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,var(--accent2),#FF9500);color:#fff;font-size:13px;font-weight:700;font-family:inherit;padding:10px 22px;border-radius:10px;border:none;cursor:pointer;transition:all 0.2s;text-decoration:none;box-shadow:0 4px 16px rgba(255,184,0,0.4)}
+.hero-btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 22px rgba(255,184,0,0.5)}
+.hero-btn-ghost{display:flex;align-items:center;gap:7px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.15);color:rgba(255,255,255,0.75);font-size:13px;font-weight:600;font-family:inherit;padding:10px 20px;border-radius:10px;cursor:pointer;transition:all 0.2s;text-decoration:none}
+.hero-btn-ghost:hover{background:rgba(255,255,255,0.12);color:#fff}
+.hero-right{position:relative;z-index:1;display:flex;gap:10px;flex-shrink:0}
+.hero-stat-pill{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:14px 18px;text-align:center;min-width:88px;backdrop-filter:blur(10px)}
+.hsp-num{font-size:22px;font-weight:900;color:#fff;letter-spacing:-1px;line-height:1}
+.hsp-num small{font-size:12px;font-weight:500;opacity:0.6}
+.hsp-label{font-size:10px;color:rgba(255,255,255,0.4);margin-top:5px;letter-spacing:0.5px}
+.hsp-change{font-size:10px;font-weight:700;margin-top:4px}
+.hsp-up{color:#4ADE80}.hsp-warn{color:var(--accent2)}
+
+/* ── 预警条 ── */
+.alert-strip{border-radius:12px;padding:13px 18px;margin-bottom:16px;display:flex;align-items:center;gap:12px;border:1px solid;position:relative;overflow:hidden}
+.alert-strip.red{background:#FFF5F5;border-color:rgba(239,68,68,0.2)}
+.alert-strip.amber{background:#FFFBEB;border-color:rgba(245,158,11,0.25)}
+.alert-strip::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;border-radius:3px 0 0 3px}
+.alert-strip.red::before{background:#EF4444}
+.alert-strip.amber::before{background:#F59E0B}
+.alert-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.alert-strip.red .alert-icon{background:#FEE2E2;color:#DC2626}
+.alert-strip.amber .alert-icon{background:#FEF3C7;color:#D97706}
+.alert-body{flex:1}
+.alert-title{font-size:12px;font-weight:700;margin-bottom:2px}
+.alert-strip.red .alert-title{color:#991B1B}
+.alert-strip.amber .alert-title{color:#92400E}
+.alert-desc{font-size:11px;line-height:1.5}
+.alert-strip.red .alert-desc{color:#B91C1C}
+.alert-strip.amber .alert-desc{color:#B45309}
+.alert-cta{flex-shrink:0;font-size:11px;font-weight:700;padding:6px 14px;border-radius:8px;border:none;cursor:pointer;font-family:inherit;text-decoration:none;display:flex;align-items:center;gap:4px;transition:all 0.2s}
+.alert-strip.red .alert-cta{background:#EF4444;color:#fff}
+.alert-strip.amber .alert-cta{background:#F59E0B;color:#fff}
+
+/* ── 四大收益卡 ── */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi-card{background:var(--card);border-radius:14px;border:1px solid var(--border);box-shadow:var(--shadow);padding:18px 20px;transition:all 0.25s;cursor:default;position:relative;overflow:hidden}
+.kpi-card:hover{box-shadow:var(--shadow-hover);transform:translateY(-2px)}
+.kpi-card::after{content:'';position:absolute;top:-20px;right:-20px;width:80px;height:80px;border-radius:50%;opacity:0.06}
+.kpi-card.green::after{background:var(--green)}
+.kpi-card.amber::after{background:var(--accent2)}
+.kpi-card.blue::after{background:var(--blue)}
+.kpi-card.purple::after{background:var(--purple)}
+.kpi-icon{width:38px;height:38px;border-radius:11px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:12px}
+.kpi-label{font-size:11px;color:var(--muted);font-weight:500;margin-bottom:6px}
+.kpi-num{font-size:28px;font-weight:900;letter-spacing:-1.5px;line-height:1;margin-bottom:6px}
+.kpi-card.green .kpi-num{color:var(--green)}
+.kpi-card.amber .kpi-num{color:#D97706}
+.kpi-card.blue .kpi-num{color:var(--blue)}
+.kpi-card.purple .kpi-num{color:var(--purple)}
+.kpi-change{font-size:11px;font-weight:600;display:flex;align-items:center;gap:4px}
+.kpi-sub{font-size:10px;color:var(--muted2);margin-top:4px}
+
+/* ── 主网格 ── */
+.main-grid{display:grid;grid-template-columns:1fr 1fr 320px;gap:18px;align-items:start}
+
+/* ── 通用卡片 ── */
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:var(--shadow);overflow:hidden;transition:box-shadow 0.25s}
+.card:hover{box-shadow:var(--shadow-hover)}
+.card-head{padding:15px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(0,0,0,0.05)}
+.card-title{font-size:13px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+.card-title-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.card-action{font-size:12px;color:var(--green2);font-weight:600;text-decoration:none;cursor:pointer;display:flex;align-items:center;gap:4px;transition:color 0.2s}
+.card-action:hover{color:var(--green)}
+
+/* ── 价格波动面板 ── */
+#priceChart{width:100%;height:180px}
+.price-tags{display:flex;gap:8px;padding:12px 16px;flex-wrap:wrap;border-top:1px solid rgba(0,0,0,0.05)}
+.price-tag{display:flex;align-items:center;gap:6px;background:#F8F9FA;border:1px solid rgba(0,0,0,0.07);border-radius:8px;padding:6px 10px;font-size:11px;flex:1;min-width:110px}
+.pt-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.pt-name{color:var(--muted);font-weight:500}
+.pt-val{font-weight:800;color:var(--ink);margin-left:auto}
+.pt-chg{font-size:10px;font-weight:700;margin-left:4px}
+.pt-up{color:#EF4444}.pt-dn{color:#10B981}.pt-flat{color:var(--muted2)}
+
+/* ── 自动派单看板 ── */
+.dispatch-row{display:flex;align-items:center;gap:10px;padding:11px 16px;border-bottom:1px solid rgba(0,0,0,0.04);transition:background 0.15s;cursor:pointer}
+.dispatch-row:last-child{border-bottom:none}
+.dispatch-row:hover{background:#FAFBFC}
+.dr-status{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.dr-info{flex:1;min-width:0}
+.dr-name{font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:2px}
+.dr-meta{font-size:10px;color:var(--muted2);display:flex;align-items:center;gap:6px}
+.dr-stage{font-size:10px;font-weight:700;padding:2px 8px;border-radius:6px;flex-shrink:0}
+.stage-auto{background:#D1FAE5;color:#065F46}
+.stage-pm{background:#DBEAFE;color:#1D4ED8}
+.stage-review{background:#FEF3C7;color:#92400E}
+.stage-done{background:#F3F4F6;color:#6B7280}
+.dr-amount{font-size:12px;font-weight:800;color:var(--ink);flex-shrink:0;margin-left:8px}
+
+/* ── 抽成明细 ── */
+.commission-item{display:flex;align-items:center;justify-content:space-between;padding:11px 20px;border-bottom:1px solid rgba(0,0,0,0.04)}
+.commission-item:last-child{border-bottom:none}
+.ci-left{display:flex;align-items:center;gap:10px}
+.ci-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0}
+.ci-name{font-size:12px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.ci-meta{font-size:10px;color:var(--muted2)}
+.ci-amount{text-align:right}
+.ci-fee{font-size:14px;font-weight:800;color:var(--green)}
+.ci-rate{font-size:10px;color:var(--muted2);margin-top:2px}
+
+/* ── 行情预警卡 ── */
+.market-item{padding:12px 16px;border-bottom:1px solid rgba(0,0,0,0.04);cursor:pointer;transition:background 0.15s}
+.market-item:last-child{border-bottom:none}
+.market-item:hover{background:#FAFBFC}
+.mi-head{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+.mi-badge{font-size:9px;font-weight:800;padding:2px 7px;border-radius:5px;letter-spacing:0.5px}
+.mi-badge.warn{background:#FEF3C7;color:#92400E}
+.mi-badge.up{background:#FEE2E2;color:#991B1B}
+.mi-badge.info{background:#EFF6FF;color:#1D4ED8}
+.mi-badge.tip{background:#D1FAE5;color:#065F46}
+.mi-time{font-size:10px;color:var(--muted2);margin-left:auto}
+.mi-text{font-size:12px;color:var(--ink3);line-height:1.6}
+.mi-tag{display:inline-flex;align-items:center;gap:3px;font-size:10px;color:var(--muted2);margin-top:5px;background:#F3F4F6;padding:2px 7px;border-radius:5px}
+
+/* ── 快捷操作 ── */
+.quick-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:14px}
+.quick-card{display:flex;flex-direction:column;align-items:flex-start;gap:8px;padding:14px;border-radius:12px;background:#FAFBFC;border:1.5px solid rgba(0,0,0,0.05);cursor:pointer;text-decoration:none;color:inherit;transition:all 0.2s}
+.quick-card:hover{background:#fff;border-color:var(--green);transform:translateY(-2px);box-shadow:0 6px 20px rgba(29,185,84,0.12)}
+.qc-icon{width:34px;height:34px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.qc-label{font-size:12px;font-weight:700;color:var(--ink)}
+.qc-sub{font-size:10px;color:var(--muted2);margin-top:-4px}
+</style>
+</head>
+<body>
+
+<!-- ══ 侧边栏 ══ -->
+<aside class="sidebar">
+  <a href="landing.html" class="sb-logo">
+    <div class="sb-logo-icon">M</div>
+    <div>
+      <div class="sb-logo-cn">材印达</div>
+      <div class="sb-logo-en">MatPrint</div>
+    </div>
+  </a>
+
+  <div class="sb-user-card">
+    <div class="sb-ava">张</div>
+    <div>
+      <div class="sb-uname">张总</div>
+      <div class="sb-role-tag"><i class="fa-solid fa-crown" style="font-size:8px"></i> 平台运营者</div>
+    </div>
+  </div>
+
+  <div class="sb-group">运营中心</div>
+  <a href="brand-dashboard.html" class="sb-link active">
+    <i class="si fa-solid fa-gauge-high" style="color:var(--accent2)"></i> 运营控制台
+  </a>
+  <a href="dispatch.html" class="sb-link">
+    <i class="si fa-solid fa-paper-plane" style="color:#F97316"></i> 派单中心
+    <span class="badge">5</span>
+  </a>
+  <a href="settlement.html" class="sb-link">
+    <i class="si fa-solid fa-wallet" style="color:var(--green)"></i> 结算 &amp; 抽成
+  </a>
+
+  <div class="sb-group">采购平台</div>
+  <a href="new-order.html" class="sb-link">
+    <i class="si fa-solid fa-circle-plus"></i> 发布需求
+  </a>
+  <a href="order-list.html" class="sb-link">
+    <i class="si fa-solid fa-list-check"></i> 订单管理
+    <span class="badge">3</span>
+  </a>
+  <a href="supplier-market.html" class="sb-link">
+    <i class="si fa-solid fa-store"></i> 供应商市场
+  </a>
+
+  <div class="sb-group">情报 &amp; 社区</div>
+  <a href="community.html" class="sb-link">
+    <i class="si fa-solid fa-fire" style="color:#F97316"></i> 行情社区
+  </a>
+  <a href="#" class="sb-link" onclick="alert('价格监控模块开发中')">
+    <i class="si fa-solid fa-chart-line" style="color:var(--red)"></i> 材料行情
+  </a>
+
+  <div class="sb-group">账号</div>
+  <a href="#" class="sb-link" onclick="alert('规则配置开发中')">
+    <i class="si fa-solid fa-sliders"></i> 派单规则配置
+  </a>
+  <a href="#" class="sb-link" onclick="alert('账号设置开发中')">
+    <i class="si fa-solid fa-gear"></i> 账号设置
+  </a>
+
+  <div class="sb-bottom">
+    <a href="login.html" class="sb-exit">
+      <i class="fa-solid fa-right-from-bracket"></i> 退出登录
+    </a>
+  </div>
+</aside>
+
+<!-- ══ 主区域 ══ -->
+<div class="main">
+
+  <!-- 顶部栏 -->
+  <div class="topbar">
+    <div class="topbar-breadcrumb">
+      <span>材印达</span>
+      <span style="opacity:0.3;margin:0 4px">/</span>
+      <strong>运营控制台</strong>
+      <span style="margin-left:10px;font-size:11px;background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:6px;font-weight:700">
+        <i class="fa-solid fa-circle" style="font-size:7px;margin-right:3px;animation:pulse 1.5s infinite"></i>平台运行中
+      </span>
+    </div>
+    <div class="topbar-right">
+      <div class="tb-icon-btn" title="搜索"><i class="fa-solid fa-magnifying-glass"></i></div>
+      <div class="tb-icon-btn" title="通知"><i class="fa-solid fa-bell"></i><div class="tb-dot"></div></div>
+      <a href="dispatch.html" class="btn-new" style="background:linear-gradient(135deg,var(--accent2),#FF9500);box-shadow:0 4px 14px rgba(255,184,0,0.35)">
+        <i class="fa-solid fa-paper-plane"></i> 进入派单中心
+      </a>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- Hero Banner（运营者版） -->
+    <div class="hero-banner">
+      <div class="hero-left">
+        <div class="hero-tag"><i class="fa-solid fa-crown"></i> 平台运营者视图</div>
+        <div class="hero-hi">你好，<em>张总</em> 👋 今天平台运转正常</div>
+        <div class="hero-sub">
+          今日 <strong>自动派单 12 笔</strong>，系统处理率 <strong>91%</strong>，
+          仅 <strong>1 笔</strong> 需要你手动干预。
+          本月累计抽成收益 <strong>¥18,640</strong>，较上月 <strong>↑ 23%</strong>。
+        </div>
+        <div class="hero-actions">
+          <a href="settlement.html" class="hero-btn-primary">
+            <i class="fa-solid fa-coins"></i> 查看收益明细
+          </a>
+          <a href="dispatch.html" class="hero-btn-ghost">
+            <i class="fa-solid fa-triangle-exclamation"></i> 处理异常订单 (1)
+          </a>
+        </div>
+      </div>
+      <div class="hero-right">
+        <div class="hero-stat-pill">
+          <div class="hsp-num">18.6<small>k</small></div>
+          <div class="hsp-label">本月抽成 ¥</div>
+          <div class="hsp-change hsp-up">↑ +23%</div>
+        </div>
+        <div class="hero-stat-pill">
+          <div class="hsp-num">91<small>%</small></div>
+          <div class="hsp-label">自动化率</div>
+          <div class="hsp-change hsp-up">↑ 较上月</div>
+        </div>
+        <div class="hero-stat-pill">
+          <div class="hsp-num">1<small>笔</small></div>
+          <div class="hsp-label">待人工干预</div>
+          <div class="hsp-change hsp-warn">⚠ 需处理</div>
+        </div>
+        <div class="hero-stat-pill">
+          <div class="hsp-num">47<small>家</small></div>
+          <div class="hsp-label">活跃供应商</div>
+          <div class="hsp-change hsp-up">↑ +3 本月</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 预警条 -->
+    <div class="alert-strip red" style="margin-bottom:10px">
+      <div class="alert-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <div class="alert-body">
+        <div class="alert-title">【价格预警】UV 油墨原料上涨 8%，预计 2 周后传导至终端报价</div>
+        <div class="alert-desc">建议通知有大单需求的客户提前锁价，或联系框架供应商确认是否调价</div>
+      </div>
+      <a href="community.html" class="alert-cta"><i class="fa-solid fa-arrow-right"></i> 查看详情</a>
+    </div>
+    <div class="alert-strip amber" style="margin-bottom:20px">
+      <div class="alert-icon"><i class="fa-solid fa-box-open"></i></div>
+      <div class="alert-body">
+        <div class="alert-title">【供应链】广州番禺印刷园区环保检查，部分厂家停产 3 天</div>
+        <div class="alert-desc">ORD-2025-018（华南区域喷绘订单）交期可能延误，建议主动联系客户告知</div>
+      </div>
+      <a href="dispatch.html" class="alert-cta"><i class="fa-solid fa-paper-plane"></i> 处理订单</a>
+    </div>
+
+    <!-- 四大 KPI 卡 -->
+    <div class="kpi-row">
+      <div class="kpi-card green">
+        <div class="kpi-icon" style="background:#D1FAE5;color:#065F46"><i class="fa-solid fa-coins"></i></div>
+        <div class="kpi-label">本月抽成收益</div>
+        <div class="kpi-num">¥18,640</div>
+        <div class="kpi-change" style="color:#10B981"><i class="fa-solid fa-arrow-trend-up"></i> 较上月 +23%</div>
+        <div class="kpi-sub">年累计 ¥142,800</div>
+      </div>
+      <div class="kpi-card amber">
+        <div class="kpi-icon" style="background:#FEF3C7;color:#D97706"><i class="fa-solid fa-hourglass-half"></i></div>
+        <div class="kpi-label">待结算金额</div>
+        <div class="kpi-num">¥6,320</div>
+        <div class="kpi-change" style="color:#D97706"><i class="fa-solid fa-clock"></i> T+7 自动结算</div>
+        <div class="kpi-sub">预计 6月22日到账</div>
+      </div>
+      <div class="kpi-card blue">
+        <div class="kpi-icon" style="background:#DBEAFE;color:#1D4ED8"><i class="fa-solid fa-bolt"></i></div>
+        <div class="kpi-label">今日自动派单</div>
+        <div class="kpi-num">12<span style="font-size:16px;font-weight:500;color:var(--muted)"> 笔</span></div>
+        <div class="kpi-change" style="color:#2563EB"><i class="fa-solid fa-robot"></i> 系统自动处理 11 笔</div>
+        <div class="kpi-sub">1 笔待人工确认</div>
+      </div>
+      <div class="kpi-card purple">
+        <div class="kpi-icon" style="background:#EDE9FE;color:#6D28D9"><i class="fa-solid fa-store"></i></div>
+        <div class="kpi-label">平台 GMV（本月）</div>
+        <div class="kpi-num">¥186k</div>
+        <div class="kpi-change" style="color:#7C3AED"><i class="fa-solid fa-arrow-trend-up"></i> 同比 +31%</div>
+        <div class="kpi-sub">抽成比例均值 10%</div>
+      </div>
+    </div>
+
+    <!-- 主三栏网格 -->
+    <div class="main-grid">
+
+      <!-- 左：原材料价格波动 + 自动派单看板 -->
+      <div style="display:flex;flex-direction:column;gap:18px">
+
+        <!-- 价格波动图 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <div class="card-title-dot" style="background:#EF4444"></div>
+              原材料价格走势（近30天）
+            </div>
+            <a href="community.html" class="card-action">行情详情 <i class="fa-solid fa-arrow-right" style="font-size:10px"></i></a>
+          </div>
+          <div id="priceChart"></div>
+          <div class="price-tags">
+            <div class="price-tag">
+              <div class="pt-dot" style="background:#EF4444"></div>
+              <span class="pt-name">UV 油墨</span>
+              <span class="pt-val">¥38/kg</span>
+              <span class="pt-chg pt-up">↑8%</span>
+            </div>
+            <div class="price-tag">
+              <div class="pt-dot" style="background:#F97316"></div>
+              <span class="pt-name">PVC 板材</span>
+              <span class="pt-val">¥22/㎡</span>
+              <span class="pt-chg pt-up">↑3%</span>
+            </div>
+            <div class="price-tag">
+              <div class="pt-dot" style="background:#2563EB"></div>
+              <span class="pt-name">写真喷绘布</span>
+              <span class="pt-val">¥8/㎡</span>
+              <span class="pt-chg pt-flat">→持平</span>
+            </div>
+            <div class="price-tag">
+              <div class="pt-dot" style="background:#10B981"></div>
+              <span class="pt-name">特种纸</span>
+              <span class="pt-val">¥1.2/张</span>
+              <span class="pt-chg pt-dn">↓5%</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 自动派单看板 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <div class="card-title-dot" style="background:#2563EB"></div>
+              自动派单看板（今日）
+            </div>
+            <a href="dispatch.html" class="card-action">全部 <i class="fa-solid fa-arrow-right" style="font-size:10px"></i></a>
+          </div>
+          <div class="dispatch-row">
+            <div class="dr-status" style="background:#EF4444"></div>
+            <div class="dr-info">
+              <div class="dr-name">2025广州车展 · 大型喷绘背景板 × 6张</div>
+              <div class="dr-meta"><i class="fa-solid fa-triangle-exclamation" style="font-size:9px;color:#EF4444"></i> 需人工确认 · 金额超阈值</div>
+            </div>
+            <div class="dr-stage stage-review">待审核</div>
+            <div class="dr-amount">¥32,000</div>
+          </div>
+          <div class="dispatch-row">
+            <div class="dr-status" style="background:#10B981"></div>
+            <div class="dr-info">
+              <div class="dr-name">新品上市 · 易拉宝 × 20套</div>
+              <div class="dr-meta"><i class="fa-solid fa-robot" style="font-size:9px;color:#2563EB"></i> 已自动派 → PM 李明 · 3小时前</div>
+            </div>
+            <div class="dr-stage stage-auto">自动派单</div>
+            <div class="dr-amount">¥4,800</div>
+          </div>
+          <div class="dispatch-row">
+            <div class="dr-status" style="background:#10B981"></div>
+            <div class="dr-info">
+              <div class="dr-name">门店物料补货 · KT板展架 × 50套</div>
+              <div class="dr-meta"><i class="fa-solid fa-robot" style="font-size:9px;color:#2563EB"></i> 已自动派 → PM 王芳 · 5小时前</div>
+            </div>
+            <div class="dr-stage stage-pm">PM处理中</div>
+            <div class="dr-amount">¥9,200</div>
+          </div>
+          <div class="dispatch-row">
+            <div class="dr-status" style="background:#10B981"></div>
+            <div class="dr-info">
+              <div class="dr-name">品牌年会 · 展台搭建物料全套</div>
+              <div class="dr-meta"><i class="fa-solid fa-check" style="font-size:9px;color:#10B981"></i> 已完成 · 供应商广州展博 · 今日结算</div>
+            </div>
+            <div class="dr-stage stage-done">已完成</div>
+            <div class="dr-amount">¥28,500</div>
+          </div>
+          <div class="dispatch-row">
+            <div class="dr-status" style="background:#10B981"></div>
+            <div class="dr-info">
+              <div class="dr-name">华东区 · 终端陈列物料 × 100套</div>
+              <div class="dr-meta"><i class="fa-solid fa-robot" style="font-size:9px;color:#2563EB"></i> 已自动派 → PM 陈伟 · 1小时前</div>
+            </div>
+            <div class="dr-stage stage-auto">自动派单</div>
+            <div class="dr-amount">¥15,600</div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 中：抽成收益明细 + 快捷操作 -->
+      <div style="display:flex;flex-direction:column;gap:18px">
+
+        <!-- 收益图 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <div class="card-title-dot" style="background:var(--green)"></div>
+              抽成收益趋势（近6月）
+            </div>
+            <a href="settlement.html" class="card-action">结算中心 <i class="fa-solid fa-arrow-right" style="font-size:10px"></i></a>
+          </div>
+          <div id="revenueChart" style="width:100%;height:180px"></div>
+          <div style="display:flex;gap:0;border-top:1px solid rgba(0,0,0,0.05)">
+            <div style="flex:1;padding:14px 16px;border-right:1px solid rgba(0,0,0,0.05);text-align:center">
+              <div style="font-size:10px;color:var(--muted2);margin-bottom:4px">年累计抽成</div>
+              <div style="font-size:20px;font-weight:900;color:var(--green);letter-spacing:-1px">¥142,800</div>
+            </div>
+            <div style="flex:1;padding:14px 16px;text-align:center">
+              <div style="font-size:10px;color:var(--muted2);margin-bottom:4px">平均抽成比例</div>
+              <div style="font-size:20px;font-weight:900;color:var(--blue);letter-spacing:-1px">10.2%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 抽成明细 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <div class="card-title-dot" style="background:#F59E0B"></div>
+              近期抽成明细
+            </div>
+            <a href="settlement.html" class="card-action">全部明细 <i class="fa-solid fa-arrow-right" style="font-size:10px"></i></a>
+          </div>
+          <div class="commission-item">
+            <div class="ci-left">
+              <div class="ci-icon" style="background:#D1FAE5;color:#065F46"><i class="fa-solid fa-check"></i></div>
+              <div>
+                <div class="ci-name">品牌年会展台搭建</div>
+                <div class="ci-meta">广州展博 · 已结算 · 06-12</div>
+              </div>
+            </div>
+            <div class="ci-amount">
+              <div class="ci-fee">+¥2,850</div>
+              <div class="ci-rate">订单 ¥28,500 × 10%</div>
+            </div>
+          </div>
+          <div class="commission-item">
+            <div class="ci-left">
+              <div class="ci-icon" style="background:#D1FAE5;color:#065F46"><i class="fa-solid fa-check"></i></div>
+              <div>
+                <div class="ci-name">深圳车展喷绘背景板</div>
+                <div class="ci-meta">星辰印刷 · 已结算 · 06-10</div>
+              </div>
+            </div>
+            <div class="ci-amount">
+              <div class="ci-fee">+¥1,280</div>
+              <div class="ci-rate">订单 ¥12,800 × 10%</div>
+            </div>
+          </div>
+          <div class="commission-item">
+            <div class="ci-left">
+              <div class="ci-icon" style="background:#FEF3C7;color:#D97706"><i class="fa-solid fa-hourglass-half"></i></div>
+              <div>
+                <div class="ci-name">UV 礼盒包装 × 500套</div>
+                <div class="ci-meta">东莞彩印 · T+7 待结算</div>
+              </div>
+            </div>
+            <div class="ci-amount">
+              <div class="ci-fee" style="color:#D97706">+¥960</div>
+              <div class="ci-rate">订单 ¥9,600 × 10%</div>
+            </div>
+          </div>
+          <div class="commission-item">
+            <div class="ci-left">
+              <div class="ci-icon" style="background:#DBEAFE;color:#1D4ED8"><i class="fa-solid fa-circle-notch fa-spin"></i></div>
+              <div>
+                <div class="ci-name">门店 KT 板展架 × 50套</div>
+                <div class="ci-meta">华南供应商 · 生产中</div>
+              </div>
+            </div>
+            <div class="ci-amount">
+              <div class="ci-fee" style="color:#2563EB">≈¥920</div>
+              <div class="ci-rate">预估 ¥9,200 × 10%</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 快捷操作 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <div class="card-title-dot" style="background:#7C3AED"></div>
+              快捷操作
+            </div>
+          </div>
+          <div class="quick-grid">
+            <a href="dispatch.html" class="quick-card">
+              <div class="qc-icon" style="background:#FEF3C7;color:#D97706"><i class="fa-solid fa-paper-plane"></i></div>
+              <div class="qc-label">派单中心</div>
+              <div class="qc-sub">1 笔待审核</div>
+            </a>
+            <a href="supplier-market.html" class="quick-card">
+              <div class="qc-icon" style="background:#D1FAE5;color:#065F46"><i class="fa-solid fa-store"></i></div>
+              <div class="qc-label">供应商市场</div>
+              <div class="qc-sub">47 家活跃</div>
+            </a>
+            <a href="settlement.html" class="quick-card">
+              <div class="qc-icon" style="background:#EDE9FE;color:#6D28D9"><i class="fa-solid fa-wallet"></i></div>
+              <div class="qc-label">结算中心</div>
+              <div class="qc-sub">¥6,320 待到账</div>
+            </a>
+            <a href="community.html" class="quick-card">
+              <div class="qc-icon" style="background:#FEE2E2;color:#DC2626"><i class="fa-solid fa-chart-line"></i></div>
+              <div class="qc-label">材料行情</div>
+              <div class="qc-sub">UV油墨↑8%</div>
+            </a>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- 右：行情预警 + 供应商动态 -->
+      <div style="display:flex;flex-direction:column;gap:18px">
+
+        <!-- 行情预警 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <div class="card-title-dot" style="background:#EF4444"></div>
+              行情预警 &amp; 供应链动态
+            </div>
+            <a href="community.html" class="card-action">社区 <i class="fa-solid fa-arrow-right" style="font-size:10px"></i></a>
+          </div>
+          <div class="market-item">
+            <div class="mi-head">
+              <span class="mi-badge up">价格上涨</span>
+              <span class="mi-time">今日 09:30</span>
+            </div>
+            <div class="mi-text">德国巴斯夫 UV 油墨涨价通知，成本 +8%，预计 2 周内传导至终端报价，建议提前锁价</div>
+            <div class="mi-tag"><i class="fa-solid fa-tag" style="font-size:9px"></i> UV印刷 · 油墨</div>
+          </div>
+          <div class="market-item">
+            <div class="mi-head">
+              <span class="mi-badge warn">供应中断</span>
+              <span class="mi-time">今日 08:15</span>
+            </div>
+            <div class="mi-text">广州番禺印刷园区环保检查，部分厂家停产 3 天，华南区域交期延长 3～5 天</div>
+            <div class="mi-tag"><i class="fa-solid fa-tag" style="font-size:9px"></i> 华南 · 喷绘 · 交期</div>
+          </div>
+          <div class="market-item">
+            <div class="mi-head">
+              <span class="mi-badge info">趋势洞察</span>
+              <span class="mi-time">昨日</span>
+            </div>
+            <div class="mi-text">平台近 30 天订单中，可降解环保材质占比从 12% 升至 19%，建议拓展环保供应商资源</div>
+            <div class="mi-tag"><i class="fa-solid fa-tag" style="font-size:9px"></i> 环保材质 · 趋势</div>
+          </div>
+          <div class="market-item">
+            <div class="mi-head">
+              <span class="mi-badge tip">利好消息</span>
+              <span class="mi-time">2天前</span>
+            </div>
+            <div class="mi-text">国内特种纸供应恢复，价格下降 5%，适合现在签订年框协议，锁定低价</div>
+            <div class="mi-tag"><i class="fa-solid fa-tag" style="font-size:9px"></i> 特种纸 · 年框</div>
+          </div>
+        </div>
+
+        <!-- 供应商活跃度 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <div class="card-title-dot" style="background:var(--purple)"></div>
+              供应商活跃度 TOP 5
+            </div>
+            <a href="supplier-market.html" class="card-action">全部 <i class="fa-solid fa-arrow-right" style="font-size:10px"></i></a>
+          </div>
+          <div id="supplierChart" style="width:100%;height:160px"></div>
+        </div>
+
+        <!-- 派单规则状态 -->
+        <div class="card">
+          <div class="card-head">
+            <div class="card-title">
+              <div class="card-title-dot" style="background:var(--blue)"></div>
+              自动派单规则状态
+            </div>
+            <a href="#" class="card-action" onclick="alert('规则配置开发中')">配置 <i class="fa-solid fa-arrow-right" style="font-size:10px"></i></a>
+          </div>
+          <div style="padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font-size:12px;color:var(--ink3)"><i class="fa-solid fa-circle" style="color:#10B981;font-size:8px;margin-right:6px"></i>金额 ≤ ¥20,000 → 自动派单</div>
+              <span style="font-size:10px;background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:6px;font-weight:700">运行中</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font-size:12px;color:var(--ink3)"><i class="fa-solid fa-circle" style="color:#10B981;font-size:8px;margin-right:6px"></i>华南区域 → 优先本地供应商</div>
+              <span style="font-size:10px;background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:6px;font-weight:700">运行中</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font-size:12px;color:var(--ink3)"><i class="fa-solid fa-circle" style="color:#10B981;font-size:8px;margin-right:6px"></i>金额 &gt; ¥20,000 → 通知张总审核</div>
+              <span style="font-size:10px;background:#D1FAE5;color:#065F46;padding:2px 8px;border-radius:6px;font-weight:700">运行中</span>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:space-between">
+              <div style="font-size:12px;color:var(--ink3)"><i class="fa-solid fa-circle" style="color:#F59E0B;font-size:8px;margin-right:6px"></i>年框供应商 → 优先匹配</div>
+              <span style="font-size:10px;background:#FEF3C7;color:#92400E;padding:2px 8px;border-radius:6px;font-weight:700">配置中</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div><!-- /main-grid -->
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<style>
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
+</style>
+
+<script>
+window.addEventListener('load', () => {
+
+  // ── 价格走势图 ──
+  const priceChart = echarts.init(document.getElementById('priceChart'));
+  const days = [];
+  for(let i=29;i>=0;i--){
+    const d = new Date(); d.setDate(d.getDate()-i);
+    days.push((d.getMonth()+1)+'/'+(d.getDate()));
+  }
+  const uvBase=[32,32,33,33,34,34,33,34,35,35,36,35,36,37,37,36,37,38,38,37,38,39,39,40,40,39,40,41,41,38];
+  const pvcBase=[21,21,21,22,22,22,21,22,22,22,22,23,23,22,22,22,23,23,22,22,22,22,22,22,23,22,22,22,22,22];
+  priceChart.setOption({
+    grid:{top:12,right:16,bottom:8,left:40,containLabel:true},
+    tooltip:{trigger:'axis',axisPointer:{type:'cross'},textStyle:{fontSize:11}},
+    legend:{show:false},
+    xAxis:{type:'category',data:days,axisLabel:{fontSize:9,interval:4,color:'#9CA3AF'},axisLine:{lineStyle:{color:'rgba(0,0,0,0.08)'}},splitLine:{show:false}},
+    yAxis:{type:'value',axisLabel:{fontSize:9,color:'#9CA3AF',formatter:'{value}'},splitLine:{lineStyle:{color:'rgba(0,0,0,0.05)',type:'dashed'}}},
+    series:[
+      {name:'UV油墨(¥/kg)',type:'line',data:uvBase,smooth:true,symbol:'none',lineStyle:{color:'#EF4444',width:2},areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(239,68,68,0.15)'},{offset:1,color:'rgba(239,68,68,0)'}]}}},
+      {name:'PVC板材(¥/㎡)',type:'line',data:pvcBase,smooth:true,symbol:'none',lineStyle:{color:'#F97316',width:2},areaStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'rgba(249,115,22,0.1)'},{offset:1,color:'rgba(249,115,22,0)'}]}}}
+    ]
+  });
+
+  // ── 收益趋势图 ──
+  const revenueChart = echarts.init(document.getElementById('revenueChart'));
+  revenueChart.setOption({
+    grid:{top:12,right:16,bottom:8,left:40,containLabel:true},
+    tooltip:{trigger:'axis',textStyle:{fontSize:11},formatter:(p)=>`${p[0].name}<br/>抽成收益：¥${(p[0].value*1000).toLocaleString()}`},
+    xAxis:{type:'category',data:['1月','2月','3月','4月','5月','6月'],axisLabel:{fontSize:10,color:'#9CA3AF'},axisLine:{lineStyle:{color:'rgba(0,0,0,0.08)'}},splitLine:{show:false}},
+    yAxis:{type:'value',axisLabel:{fontSize:9,color:'#9CA3AF',formatter:'{value}k'},splitLine:{lineStyle:{color:'rgba(0,0,0,0.05)',type:'dashed'}}},
+    series:[{
+      type:'bar',
+      data:[8.2,9.6,11.4,13.8,15.1,18.6],
+      barWidth:'50%',
+      itemStyle:{color:{type:'linear',x:0,y:0,x2:0,y2:1,colorStops:[{offset:0,color:'#1DB954'},{offset:1,color:'rgba(29,185,84,0.3)'}]},borderRadius:[6,6,0,0]},
+      label:{show:true,position:'top',formatter:'{c}k',fontSize:10,fontWeight:700,color:'#065F46'}
+    }]
+  });
+
+  // ── 供应商活跃度图 ──
+  const supplierChart = echarts.init(document.getElementById('supplierChart'));
+  supplierChart.setOption({
+    grid:{top:8,right:16,bottom:8,left:80,containLabel:true},
+    tooltip:{trigger:'axis',textStyle:{fontSize:11}},
+    xAxis:{type:'value',axisLabel:{fontSize:9,color:'#9CA3AF'},splitLine:{lineStyle:{color:'rgba(0,0,0,0.05)',type:'dashed'}}},
+    yAxis:{type:'category',data:['东莞彩印科技','深圳星辰印刷','广州展博展示','上海印艺坊','北京物料城'],axisLabel:{fontSize:10,color:'#374151'}},
+    series:[{
+      type:'bar',
+      data:[8,11,14,9,16],
+      barWidth:'50%',
+      itemStyle:{color:(p)=>['#DBEAFE','#D1FAE5','#FEF3C7','#EDE9FE','#D1FAE5'][p.dataIndex],borderRadius:[0,6,6,0]},
+      label:{show:true,position:'right',formatter:'{c}单',fontSize:10,fontWeight:700}
+    }]
+  });
+
+  // 响应式
+  window.addEventListener('resize', () => {
+    priceChart.resize(); revenueChart.resize(); supplierChart.resize();
+  });
+  setTimeout(()=>{priceChart.resize();revenueChart.resize();supplierChart.resize();},100);
+});
+</script>
+</body>
+</html>

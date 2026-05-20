@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>发布需求 · 材印达 MatPrint</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1DB954;--green2:#0EA847;--ink:#0D1117;--ink2:#1C2333;--ink3:#374151;
+  --white:#fff;--bg:#F0F2F5;--card:#fff;--border:rgba(0,0,0,0.07);
+  --muted:#6B7280;--muted2:#9CA3AF;--sidebar:240px;--radius:16px;
+  --orange:#F97316;--purple:#7C3AED;--blue:#2563EB;
+}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+.sidebar{width:var(--sidebar);background:var(--ink2);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:24px 20px 20px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.06)}
+.sb-logo-icon{width:32px;height:32px;border-radius:9px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;flex-shrink:0}
+.sb-logo-cn{font-size:14px;font-weight:700;color:#fff}
+.sb-logo-en{font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:2px}
+.sb-user-card{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:10px}
+.sb-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.sb-uname{font-size:13px;font-weight:700;color:#fff}
+.sb-role-tag{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px}
+.sb-group{font-size:9px;font-weight:700;color:rgba(255,255,255,0.25);letter-spacing:2px;text-transform:uppercase;padding:16px 20px 6px}
+.sb-link{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.55);text-decoration:none;transition:all 0.18s;border-left:3px solid transparent}
+.sb-link:hover{color:#fff;background:rgba(255,255,255,0.05);border-left-color:rgba(255,255,255,0.2)}
+.sb-link.active{color:#fff;background:rgba(29,185,84,0.12);border-left-color:var(--green)}
+.si{width:16px;text-align:center;flex-shrink:0}
+.badge{margin-left:auto;background:#EF4444;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px}
+.sb-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid rgba(255,255,255,0.06)}
+.sb-exit{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;transition:color 0.18s}
+.sb-exit:hover{color:#EF4444}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:56px;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:100}
+.topbar-breadcrumb{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.topbar-breadcrumb strong{color:var(--ink)}
+.sep{opacity:0.3}
+.content{padding:32px 40px;flex:1;max-width:860px;margin:0 auto;width:100%}
+
+/* ── 顶部进度条 ── */
+.wizard-header{margin-bottom:36px}
+.wizard-title{font-size:22px;font-weight:900;color:var(--ink);margin-bottom:6px;letter-spacing:-0.5px}
+.wizard-sub{font-size:13px;color:var(--muted2)}
+.wizard-steps{display:flex;align-items:center;margin-top:24px;position:relative}
+.wizard-steps::before{content:'';position:absolute;top:18px;left:18px;right:18px;height:2px;background:var(--border);z-index:0}
+.ws-track{position:absolute;top:18px;left:18px;height:2px;background:var(--green);z-index:1;transition:width 0.5s ease}
+.ws{flex:1;display:flex;flex-direction:column;align-items:center;gap:8px;position:relative;z-index:2}
+.ws-dot{width:36px;height:36px;border-radius:50%;border:2px solid var(--border);background:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--muted2);transition:all 0.3s;flex-shrink:0}
+.ws.active .ws-dot{background:var(--green);border-color:var(--green);color:#fff;box-shadow:0 0 0 5px rgba(29,185,84,0.15)}
+.ws.done .ws-dot{background:var(--green);border-color:var(--green);color:#fff}
+.ws-label{font-size:11px;font-weight:700;color:var(--muted2);white-space:nowrap}
+.ws.active .ws-label{color:var(--ink)}
+.ws.done .ws-label{color:var(--green)}
+.ws-sub{font-size:10px;color:var(--muted2)}
+
+/* ── 步骤面板 ── */
+.step-panel{display:none;animation:fadeUp 0.3s ease}
+.step-panel.show{display:block}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── 卡片 ── */
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:28px;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.card-title{font-size:15px;font-weight:800;color:var(--ink);margin-bottom:6px;display:flex;align-items:center;gap:10px}
+.card-title i{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.card-sub{font-size:12px;color:var(--muted2);margin-bottom:22px;padding-left:42px}
+
+/* 品类网格 */
+.cat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.cat-btn{border:1.5px solid var(--border);border-radius:14px;padding:16px 8px;text-align:center;cursor:pointer;transition:all 0.2s;background:#fff;font-family:inherit;position:relative}
+.cat-btn:hover{border-color:var(--green);background:#F0FDF6;transform:translateY(-2px)}
+.cat-btn.sel{border-color:var(--green);background:#F0FDF6;box-shadow:0 0 0 3px rgba(29,185,84,0.12)}
+.cat-btn.sel::after{content:'✓';position:absolute;top:6px;right:8px;font-size:10px;font-weight:800;color:var(--green)}
+.cat-icon{font-size:26px;margin-bottom:7px}
+.cat-name{font-size:11px;font-weight:700;color:var(--ink)}
+
+/* 表单 */
+.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.fg{display:flex;flex-direction:column;gap:6px}
+.fg.full{grid-column:1/-1}
+label{font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:0.5px;text-transform:uppercase}
+input,select,textarea{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:11px 14px;font-size:13px;font-family:inherit;color:var(--ink);outline:none;transition:border 0.2s,box-shadow 0.2s;background:#fff}
+input:focus,select:focus,textarea:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(29,185,84,0.08)}
+textarea{resize:vertical;min-height:88px;line-height:1.7}
+
+/* 上传区 */
+.upload-zone{border:2px dashed rgba(29,185,84,0.3);border-radius:12px;padding:24px;text-align:center;cursor:pointer;transition:all 0.2s;background:linear-gradient(135deg,rgba(29,185,84,0.02),rgba(29,185,84,0.04))}
+.upload-zone:hover,.upload-zone.has-file{border-color:var(--green);background:linear-gradient(135deg,rgba(29,185,84,0.05),rgba(29,185,84,0.08))}
+.upload-icon{font-size:30px;color:var(--green);margin-bottom:8px}
+.upload-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:4px}
+.upload-sub{font-size:11px;color:var(--muted2)}
+.upload-file-info{display:none;align-items:center;gap:10px;background:#F0FDF6;border-radius:10px;padding:10px 14px;margin-top:14px;border:1px solid rgba(29,185,84,0.2)}
+.upload-file-info.show{display:flex}
+.ufi-icon{font-size:20px;color:var(--green);flex-shrink:0}
+.ufi-name{font-size:12px;font-weight:700;color:var(--ink);flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ufi-size{font-size:10px;color:var(--muted2)}
+.ufi-del{font-size:12px;color:#EF4444;cursor:pointer;padding:2px 8px;border-radius:6px;transition:background 0.15s;flex-shrink:0}
+.ufi-del:hover{background:#FEE2E2}
+
+/* ── 第2步：报价确认 ── */
+.qty-selector{display:flex;align-items:center;gap:0;border:1.5px solid var(--border);border-radius:12px;overflow:hidden;width:fit-content}
+.qty-btn{width:44px;height:44px;border:none;background:#F8FAFC;cursor:pointer;font-size:18px;font-weight:700;color:var(--ink3);transition:background 0.15s;font-family:inherit;flex-shrink:0}
+.qty-btn:hover{background:#F0F0F0}
+.qty-input{width:80px;height:44px;border:none;border-left:1.5px solid var(--border);border-right:1.5px solid var(--border);text-align:center;font-size:16px;font-weight:800;color:var(--ink);font-family:inherit;outline:none}
+.tier-pills{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.tier-pill{padding:8px 16px;border-radius:20px;border:1.5px solid var(--border);font-size:12px;font-weight:700;cursor:pointer;transition:all 0.18s;background:#fff;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px}
+.tier-pill:hover{border-color:var(--green);background:#F0FDF6}
+.tier-pill.active{border-color:var(--green);background:#F0FDF6;box-shadow:0 0 0 3px rgba(29,185,84,0.1)}
+.tier-pill .tp-qty{font-size:10px;color:var(--muted2);font-weight:500}
+.tier-pill .tp-price{font-size:14px;font-weight:900;color:var(--ink)}
+.tier-pill .tp-ship{font-size:10px;margin-top:1px}
+.tier-pill.active .tp-price{color:var(--green2)}
+
+/* 报价汇总 */
+.price-summary{background:linear-gradient(135deg,#F0FDF6,#DCFCE7);border-radius:14px;padding:20px 24px;margin-top:16px;border:1px solid rgba(29,185,84,0.15)}
+.ps-row{display:flex;align-items:center;justify-content:space-between;font-size:13px;padding:5px 0}
+.ps-label{color:var(--muted)}
+.ps-val{font-weight:700;color:var(--ink)}
+.ps-divider{border:none;border-top:1px dashed rgba(29,185,84,0.2);margin:10px 0}
+.ps-total-row{display:flex;align-items:center;justify-content:space-between;margin-top:4px}
+.ps-total-label{font-size:14px;font-weight:800;color:var(--green2)}
+.ps-total-val{font-size:26px;font-weight:900;color:var(--ink);letter-spacing:-1px}
+
+/* 工艺选项 */
+.addon-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:4px}
+.addon-item{border:1.5px solid var(--border);border-radius:10px;padding:11px 12px;cursor:pointer;transition:all 0.18s;display:flex;align-items:center;gap:8px;background:#fff}
+.addon-item:hover{border-color:var(--green)}
+.addon-item.sel{border-color:var(--green);background:#F0FDF6}
+.addon-item input[type=checkbox]{width:14px;height:14px;accent-color:var(--green);cursor:pointer;flex-shrink:0}
+.addon-name{font-size:12px;font-weight:700;color:var(--ink)}
+.addon-price{font-size:10px;color:var(--orange);font-weight:700;margin-top:1px}
+
+/* BOM 入口 */
+.bom-trigger{display:flex;align-items:center;justify-content:space-between;background:#EFF6FF;border:1.5px solid rgba(37,99,235,0.2);border-radius:12px;padding:14px 18px;cursor:pointer;transition:all 0.2s;margin-top:16px}
+.bom-trigger:hover{background:#DBEAFE;border-color:rgba(37,99,235,0.4)}
+.bom-trigger-left{display:flex;align-items:center;gap:12px}
+.bom-trigger-icon{width:36px;height:36px;border-radius:9px;background:linear-gradient(135deg,#1e3a5f,#2563EB);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;flex-shrink:0}
+.bom-trigger-title{font-size:13px;font-weight:700;color:#1e3a5f}
+.bom-trigger-sub{font-size:11px;color:#3B82F6;margin-top:2px}
+.bom-trigger-arrow{color:#3B82F6;font-size:14px}
+.bom-trigger.no-file{opacity:0.5;cursor:not-allowed}
+.bom-trigger.no-file:hover{background:#EFF6FF;border-color:rgba(37,99,235,0.2)}
+
+/* ── 第3步：确认提交 ── */
+.confirm-summary{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-bottom:16px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.cs-header{background:linear-gradient(135deg,var(--ink2),#1a2744);padding:16px 22px;display:flex;align-items:center;justify-content:space-between}
+.cs-header-title{font-size:14px;font-weight:800;color:#fff}
+.cs-edit{font-size:11px;color:rgba(255,255,255,0.5);cursor:pointer;transition:color 0.15s}
+.cs-edit:hover{color:#fff}
+.cs-body{padding:18px 22px}
+.cs-row{display:flex;align-items:flex-start;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(0,0,0,0.04);font-size:13px}
+.cs-row:last-child{border-bottom:none}
+.cs-key{color:var(--muted2);min-width:90px;flex-shrink:0}
+.cs-val{font-weight:600;color:var(--ink3);text-align:right}
+.cs-total-bar{background:linear-gradient(135deg,#F0FDF6,#DCFCE7);border-radius:12px;padding:16px 22px;display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;border:1px solid rgba(29,185,84,0.15)}
+.ctb-label{font-size:13px;font-weight:700;color:var(--green2)}
+.ctb-val{font-size:24px;font-weight:900;color:var(--ink);letter-spacing:-0.5px}
+
+/* 联系信息（第3步） */
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+
+/* ── 底部操作栏 ── */
+.step-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px;padding-top:20px;border-top:1px solid var(--border)}
+.btn-back{display:flex;align-items:center;gap:7px;background:transparent;border:1.5px solid var(--border);color:var(--muted);font-size:13px;font-weight:600;padding:11px 22px;border-radius:11px;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-back:hover{border-color:var(--ink);color:var(--ink)}
+.btn-next{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--green),var(--green2));border:none;color:#fff;font-size:14px;font-weight:700;padding:12px 28px;border-radius:11px;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-next:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(29,185,84,0.35)}
+.btn-next:disabled{opacity:0.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-submit-final{display:flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--green),var(--green2));border:none;color:#fff;font-size:15px;font-weight:800;padding:14px 36px;border-radius:12px;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-submit-final:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(29,185,84,0.4)}
+.step-note{font-size:11px;color:var(--muted2);text-align:center;margin-top:10px}
+
+/* ── BOM 弹窗 ── */
+.bom-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.55);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:center;justify-content:center;padding:20px}
+.bom-overlay.show{display:flex}
+.bom-modal{background:#fff;border-radius:20px;width:100%;max-width:860px;max-height:90vh;overflow:hidden;display:flex;flex-direction:column;box-shadow:0 24px 80px rgba(0,0,0,0.25);animation:modalIn 0.3s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes modalIn{from{opacity:0;transform:scale(0.92) translateY(20px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.bom-header{padding:20px 24px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:linear-gradient(135deg,#f8faff,#eef2ff)}
+.bom-header-left{display:flex;align-items:center;gap:12px}
+.bom-header-icon{width:40px;height:40px;border-radius:11px;background:linear-gradient(135deg,#1e3a5f,#2563EB);display:flex;align-items:center;justify-content:center;color:#fff;font-size:16px;flex-shrink:0}
+.bom-header-title{font-size:15px;font-weight:800;color:var(--ink)}
+.bom-header-sub{font-size:11px;color:var(--muted2);margin-top:2px}
+.bom-close{width:32px;height:32px;border-radius:8px;border:1.5px solid var(--border);background:#fff;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted);transition:all 0.15s}
+.bom-close:hover{border-color:#EF4444;color:#EF4444}
+.bom-body{overflow-y:auto;flex:1;padding:20px 24px}
+.bom-section-title{font-size:11px;font-weight:700;color:var(--muted2);letter-spacing:1px;text-transform:uppercase;margin:16px 0 10px;display:flex;align-items:center;gap:6px}
+.bom-section-title:first-child{margin-top:0}
+.bom-table{width:100%;border-collapse:collapse;font-size:12px}
+.bom-table th{background:linear-gradient(135deg,#1e3a5f,#2563EB);color:#fff;font-size:10px;font-weight:700;padding:9px 10px;text-align:center}
+.bom-table th:first-child{border-radius:8px 0 0 0;text-align:left;padding-left:14px}
+.bom-table th:last-child{border-radius:0 8px 0 0}
+.bom-table td{padding:8px 10px;text-align:center;border-bottom:1px solid rgba(0,0,0,0.05)}
+.bom-table td:first-child{text-align:left;padding-left:14px;font-weight:600}
+.bom-table tr:hover td{background:#F8FAFF}
+.bom-fee-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.bom-fee-item{background:#F8FAFF;border-radius:10px;padding:12px 14px;display:flex;align-items:center;justify-content:space-between;border:1px solid rgba(37,99,235,0.1)}
+.bfi-label{font-size:11px;color:var(--muted2)}
+.bfi-val{font-size:13px;font-weight:800;color:var(--ink)}
+.bom-total-bar{background:linear-gradient(135deg,#1e3a5f,#2563EB);border-radius:12px;padding:14px 18px;display:flex;align-items:center;justify-content:space-between;color:#fff;margin-bottom:16px}
+.bom-footer{padding:14px 24px;border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:#FAFBFC;gap:10px}
+.btn-bom-dl{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,var(--green),var(--green2));border:none;color:#fff;font-size:13px;font-weight:700;padding:10px 20px;border-radius:10px;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-bom-dl:hover{transform:translateY(-1px);box-shadow:0 5px 16px rgba(29,185,84,0.35)}
+.btn-bom-cancel{display:flex;align-items:center;gap:7px;background:transparent;border:1.5px solid var(--border);color:var(--muted);font-size:13px;font-weight:600;padding:10px 18px;border-radius:10px;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-bom-cancel:hover{border-color:var(--ink);color:var(--ink)}
+.bom-loading{text-align:center;padding:48px 24px}
+.bom-loading-spinner{width:48px;height:48px;border:4px solid rgba(37,99,235,0.15);border-top-color:#2563EB;border-radius:50%;animation:spin 0.8s linear infinite;margin:0 auto 16px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* 成功状态 */
+.success-panel{text-align:center;padding:48px 32px;display:none}
+.success-panel.show{display:block;animation:fadeUp 0.4s ease}
+.success-icon{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));display:flex;align-items:center;justify-content:center;margin:0 auto 20px;font-size:28px;color:#fff;box-shadow:0 8px 24px rgba(29,185,84,0.3)}
+.success-title{font-size:22px;font-weight:900;color:var(--ink);margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--muted2);line-height:1.7;margin-bottom:28px}
+.success-order-id{background:#F0FDF6;border:1px solid rgba(29,185,84,0.2);border-radius:10px;padding:12px 20px;display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:var(--green2);margin-bottom:28px}
+.btn-go-orders{display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--green),var(--green2));border:none;color:#fff;font-size:14px;font-weight:700;padding:13px 32px;border-radius:12px;cursor:pointer;font-family:inherit;transition:all 0.2s;text-decoration:none}
+.btn-go-orders:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(29,185,84,0.35)}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="landing.html" class="sb-logo">
+    <div class="sb-logo-icon">M</div>
+    <div><div class="sb-logo-cn">材印达</div><div class="sb-logo-en">MatPrint</div></div>
+  </a>
+  <div class="sb-user-card">
+    <div class="sb-ava">李</div>
+    <div><div class="sb-uname">李明华</div><div class="sb-role-tag"><i class="fa-solid fa-circle-check" style="font-size:8px"></i> 品牌方账号</div></div>
+  </div>
+  <div class="sb-group">社区</div>
+  <a href="community.html" class="sb-link"><i class="si fa-solid fa-fire" style="color:#F97316"></i> 创意社区</a>
+  <div class="sb-group">工作台</div>
+  <a href="brand-dashboard.html" class="sb-link"><i class="si fa-solid fa-gauge-high"></i> 控制台</a>
+  <a href="dispatch.html" class="sb-link"><i class="si fa-solid fa-paper-plane" style="color:#F97316"></i> 派单中心<span class="badge">5</span></a>
+  <a href="new-order.html" class="sb-link active"><i class="si fa-solid fa-circle-plus"></i> 发布需求</a>
+  <a href="order-list.html" class="sb-link"><i class="si fa-solid fa-list-check"></i> 我的订单<span class="badge" id="sb-order-badge">3</span></a>
+  <div class="sb-group">采购</div>
+  <a href="supplier-market.html" class="sb-link"><i class="si fa-solid fa-store"></i> 供应商市场</a>
+  <a href="#" class="sb-link"><i class="si fa-solid fa-heart"></i> 收藏供应商</a>
+  <a href="#" class="sb-link"><i class="si fa-solid fa-file-invoice-dollar"></i> 报价管理</a>
+  <div class="sb-group">财务</div>
+  <a href="settlement.html" class="sb-link"><i class="si fa-solid fa-wallet"></i> 结算中心</a>
+  <div class="sb-group">账号</div>
+  <a href="#" class="sb-link"><i class="si fa-solid fa-gear"></i> 账号设置</a>
+  <div class="sb-bottom">
+    <a href="login.html" class="sb-exit"><i class="fa-solid fa-right-from-bracket"></i> 退出登录</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-breadcrumb">
+      <span>材印达</span><span class="sep">/</span>
+      <a href="brand-dashboard.html" style="color:var(--muted);text-decoration:none">工作台</a>
+      <span class="sep">/</span><strong>发布需求</strong>
+    </div>
+    <a href="brand-dashboard.html" style="font-size:12px;color:var(--muted);text-decoration:none;display:flex;align-items:center;gap:5px;border:1.5px solid var(--border);padding:6px 14px;border-radius:8px;transition:all 0.18s" onmouseover="this.style.color='var(--ink)'" onmouseout="this.style.color='var(--muted)'"><i class="fa-solid fa-arrow-left"></i> 返回控制台</a>
+  </div>
+
+  <div class="content">
+
+    <!-- 成功面板（提交后显示） -->
+    <div class="success-panel" id="successPanel">
+      <div class="success-icon"><i class="fa-solid fa-check"></i></div>
+      <div class="success-title">需求已成功发布！</div>
+      <div class="success-sub">AI 正在为你匹配最优供应商<br>预计 <strong>24小时内</strong> 收到报价，紧急需求平均响应 <strong>3小时</strong></div>
+      <div class="success-order-id"><i class="fa-solid fa-hashtag"></i> <span id="successOrderId">ORD-2025-006</span></div>
+      <br>
+      <a href="order-list.html" class="btn-go-orders"><i class="fa-solid fa-list-check"></i> 查看我的订单</a>
+    </div>
+
+    <!-- 主向导（提交前显示） -->
+    <div id="wizardPanel">
+      <!-- 顶部标题 + 步骤 -->
+      <div class="wizard-header">
+        <div class="wizard-title">发布采购需求</div>
+        <div class="wizard-sub">按步骤填写，AI 将自动匹配最优供应商并推送报价</div>
+        <div class="wizard-steps" id="wizardSteps">
+          <div class="ws-track" id="wsTrack" style="width:0%"></div>
+          <div class="ws active" id="ws1">
+            <div class="ws-dot">1</div>
+            <div class="ws-label">我要做什么</div>
+            <div class="ws-sub">品类 · 规格 · 图稿</div>
+          </div>
+          <div class="ws" id="ws2">
+            <div class="ws-dot">2</div>
+            <div class="ws-label">确认报价方案</div>
+            <div class="ws-sub">数量 · 工艺 · 总价</div>
+          </div>
+          <div class="ws" id="ws3">
+            <div class="ws-dot">3</div>
+            <div class="ws-label">提交需求</div>
+            <div class="ws-sub">确认 · 联系方式</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ 第1步：我要做什么 ══ -->
+      <div class="step-panel show" id="panel1">
+        <!-- 品类 -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fa-solid fa-grid-2" style="background:#F0FDF6;color:var(--green)"></i>
+            选择物料品类
+          </div>
+          <div class="card-sub">你需要制作什么类型的物料？</div>
+          <div class="cat-grid" id="catGrid">
+            <button class="cat-btn sel" onclick="selCat(this,'大幅面喷绘')"><div class="cat-icon">🖨️</div><div class="cat-name">大幅面喷绘</div></button>
+            <button class="cat-btn" onclick="selCat(this,'展台搭建')"><div class="cat-icon">🏗️</div><div class="cat-name">展台搭建</div></button>
+            <button class="cat-btn" onclick="selCat(this,'包装印刷')"><div class="cat-icon">📦</div><div class="cat-name">包装印刷</div></button>
+            <button class="cat-btn" onclick="selCat(this,'易拉宝/展架')"><div class="cat-icon">🪧</div><div class="cat-name">易拉宝/展架</div></button>
+            <button class="cat-btn" onclick="selCat(this,'标识标牌')"><div class="cat-icon">🏷️</div><div class="cat-name">标识标牌</div></button>
+            <button class="cat-btn" onclick="selCat(this,'促销物料')"><div class="cat-icon">🛍️</div><div class="cat-name">促销物料</div></button>
+            <button class="cat-btn" onclick="selCat(this,'文化墙')"><div class="cat-icon">🖼️</div><div class="cat-name">文化墙</div></button>
+            <button class="cat-btn" onclick="selCat(this,'其他定制')"><div class="cat-icon">✨</div><div class="cat-name">其他定制</div></button>
+          </div>
+        </div>
+
+        <!-- 需求描述 -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fa-solid fa-file-lines" style="background:#F0F9FF;color:#0EA5E9"></i>
+            描述你的需求
+          </div>
+          <div class="card-sub">填写需求标题和关键信息，越详细报价越准确</div>
+          <div class="form-grid">
+            <div class="fg full">
+              <label>需求标题 <span style="color:#EF4444">*</span></label>
+              <input type="text" id="req-title" placeholder="例：2025深圳车展 · 大型喷绘背景板 × 8张">
+            </div>
+            <div class="fg full">
+              <label>详细描述（尺寸、材质、使用场景）</label>
+              <textarea id="req-desc" placeholder="例：尺寸 3×6m，写真布材质，四边打孔，需防水处理，用于户外展览..."></textarea>
+            </div>
+            <div class="fg">
+              <label>交付城市 <span style="color:#EF4444">*</span></label>
+              <input type="text" id="req-city" placeholder="例：深圳、广州、上海">
+            </div>
+            <div class="fg">
+              <label>期望交付日期</label>
+              <input type="date" id="req-date">
+            </div>
+            <div class="fg">
+              <label>配送范围</label>
+              <select id="req-ship">
+                <option value="local">仅本地 / 自提</option>
+                <option value="regional">区域配送（华南/华东等）</option>
+                <option value="national">全国配发</option>
+              </select>
+            </div>
+            <div class="fg">
+              <label>预算范围</label>
+              <select id="req-budget">
+                <option>1万以内</option><option>1-5万</option>
+                <option selected>5-10万</option><option>10-50万</option><option>50万以上</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- 上传设计图 -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fa-solid fa-file-image" style="background:#EFF6FF;color:#2563EB"></i>
+            上传设计图稿
+            <span style="font-size:11px;font-weight:500;color:var(--muted2);margin-left:4px">可选 · 上传后可自动生成 BOM 报价单</span>
+          </div>
+          <div class="card-sub">支持 PDF / AI / JPG / PNG / PSD，最大 50MB</div>
+          <div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+            <input type="file" id="fileInput" accept=".pdf,.ai,.jpg,.jpeg,.png,.psd" style="display:none" onchange="handleFileUpload(this)">
+            <div class="upload-icon"><i class="fa-solid fa-cloud-arrow-up"></i></div>
+            <div class="upload-title">点击上传设计图稿</div>
+            <div class="upload-sub">上传后 AI 自动识别物料规格，无需手动填写</div>
+            <div class="upload-file-info" id="fileInfo">
+              <i class="ufi-icon fa-solid fa-file-pdf" id="fileTypeIcon"></i>
+              <div style="flex:1;min-width:0">
+                <div class="ufi-name" id="fileName">—</div>
+                <div class="ufi-size" id="fileSize">—</div>
+              </div>
+              <span class="ufi-del" id="fileDelBtn"><i class="fa-solid fa-xmark"></i> 删除</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="step-footer">
+          <div></div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+            <button class="btn-next" id="btn1Next" onclick="goStep(2)">
+              下一步：确认报价方案 <i class="fa-solid fa-arrow-right"></i>
+            </button>
+            <div class="step-note">请填写需求标题和交付城市后继续</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ 第2步：确认报价方案 ══ -->
+      <div class="step-panel" id="panel2">
+        <!-- 数量选择 -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fa-solid fa-boxes-stacked" style="background:#FFF7ED;color:#F97316"></i>
+            选择采购数量
+          </div>
+          <div class="card-sub">数量越多，单价越低。选择后系统自动匹配最优阶梯价</div>
+          <div style="display:flex;align-items:center;gap:16px;margin-bottom:16px">
+            <div class="qty-selector">
+              <button class="qty-btn" id="qtyMinus" onclick="changeQty(-1)">−</button>
+              <input type="number" class="qty-input" id="req-qty" value="8" min="1" oninput="updatePriceSummary()">
+              <button class="qty-btn" id="qtyPlus" onclick="changeQty(1)">+</button>
+            </div>
+            <select id="req-unit" style="width:80px;padding:11px 10px;font-size:13px">
+              <option>张</option><option>套</option><option>件</option>
+              <option>㎡</option><option>支</option><option>个</option><option>块</option>
+            </select>
+            <div style="font-size:12px;color:var(--muted2)">当前数量：<strong id="qtyDisplay" style="color:var(--ink);font-size:15px">8</strong></div>
+          </div>
+
+          <!-- 阶梯价格胶囊 -->
+          <div style="font-size:11px;color:var(--muted2);margin-bottom:8px;font-weight:600">快速选择数量档位：</div>
+          <div class="tier-pills">
+            <button class="tier-pill" onclick="setTierQty(1,'买家付运',85,500)">
+              <span class="tp-qty">买 1 件</span>
+              <span class="tp-price">¥85/件</span>
+              <span class="tp-ship" style="color:#EF4444">买家付运</span>
+            </button>
+            <button class="tier-pill" onclick="setTierQty(10,'半程包邮',72,0)">
+              <span class="tp-qty">买 10 件起</span>
+              <span class="tp-price">¥72/件</span>
+              <span class="tp-ship" style="color:#F59E0B">半程包邮</span>
+            </button>
+            <button class="tier-pill active" onclick="setTierQty(50,'全程包邮',65,0)">
+              <span class="tp-qty">买 50 件起</span>
+              <span class="tp-price">¥65/件</span>
+              <span class="tp-ship" style="color:var(--green)">全程包邮 🎉</span>
+            </button>
+            <button class="tier-pill" onclick="setTierQty(100,'全程包邮',58,0)">
+              <span class="tp-qty">买 100 件起</span>
+              <span class="tp-price">¥58/件</span>
+              <span class="tp-ship" style="color:var(--green)">全程包邮 ⭐</span>
+            </button>
+          </div>
+
+          <!-- 报价汇总 -->
+          <div class="price-summary" id="priceSummary">
+            <div class="ps-row">
+              <span class="ps-label">采购数量</span>
+              <span class="ps-val" id="sum-qty">8 张</span>
+            </div>
+            <div class="ps-row">
+              <span class="ps-label">适用阶梯</span>
+              <span class="ps-val" id="sum-tier">50件+ 全程包邮</span>
+            </div>
+            <div class="ps-row">
+              <span class="ps-label">基础单价</span>
+              <span class="ps-val" id="sum-price">¥65 / 件</span>
+            </div>
+            <div class="ps-row">
+              <span class="ps-label">物流方式</span>
+              <span class="ps-val" id="sum-ship">全程包邮</span>
+            </div>
+            <hr class="ps-divider">
+            <div class="ps-total-row">
+              <span class="ps-total-label">预估总金额</span>
+              <span class="ps-total-val" id="sum-total">¥520</span>
+            </div>
+            <div style="font-size:10px;color:var(--muted2);margin-top:6px">预估仅供参考，最终以供应商报价为准</div>
+          </div>
+        </div>
+
+        <!-- 工艺附加费 -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fa-solid fa-sliders" style="background:#F5F3FF;color:#7C3AED"></i>
+            工艺附加费
+            <span style="font-size:11px;font-weight:500;color:var(--muted2);margin-left:4px">可选 · 勾选后计入总价</span>
+          </div>
+          <div class="card-sub">有特殊工艺要求？勾选后自动加入报价</div>
+          <div class="addon-grid">
+            <div class="addon-item" id="a1" onclick="toggleAddon(this,0.2)">
+              <input type="checkbox"><div><div class="addon-name">UV印刷工艺</div><div class="addon-price">+20%</div></div>
+            </div>
+            <div class="addon-item" id="a2" onclick="toggleAddon(this,0.3)">
+              <input type="checkbox"><div><div class="addon-name">加急（3天内）</div><div class="addon-price">+30%</div></div>
+            </div>
+            <div class="addon-item" id="a3" onclick="toggleAddon(this,0.08)">
+              <input type="checkbox"><div><div class="addon-name">独立包装</div><div class="addon-price">+8%</div></div>
+            </div>
+            <div class="addon-item" id="a4" onclick="toggleAddon(this,0.12)">
+              <input type="checkbox"><div><div class="addon-name">防水/防UV处理</div><div class="addon-price">+12%</div></div>
+            </div>
+            <div class="addon-item" id="a5" onclick="toggleAddon(this,0)">
+              <input type="checkbox"><div><div class="addon-name">驻场安装服务</div><div class="addon-price">另行报价</div></div>
+            </div>
+            <div class="addon-item" id="a6" onclick="toggleAddon(this,0)">
+              <input type="checkbox"><div><div class="addon-name">改稿服务（2次）</div><div class="addon-price">免费含1次</div></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BOM 报价单（有上传图稿时可用） -->
+        <div class="bom-trigger" id="bomTrigger" onclick="openBomModal()">
+          <div class="bom-trigger-left">
+            <div class="bom-trigger-icon"><i class="fa-solid fa-table-list"></i></div>
+            <div>
+              <div class="bom-trigger-title">查看 BOM 物料报价单</div>
+              <div class="bom-trigger-sub" id="bomTriggerSub">上传设计图稿后可自动生成完整 BOM 报价单</div>
+            </div>
+          </div>
+          <i class="fa-solid fa-chevron-right bom-trigger-arrow"></i>
+        </div>
+
+        <div class="step-footer">
+          <button class="btn-back" onclick="goStep(1)"><i class="fa-solid fa-arrow-left"></i> 上一步</button>
+          <button class="btn-next" onclick="goStep(3)">下一步：确认并提交 <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- ══ 第3步：确认提交 ══ -->
+      <div class="step-panel" id="panel3">
+        <!-- 需求摘要 -->
+        <div class="confirm-summary">
+          <div class="cs-header">
+            <div class="cs-header-title"><i class="fa-solid fa-clipboard-check" style="margin-right:8px"></i>需求摘要</div>
+            <span class="cs-edit" onclick="goStep(1)"><i class="fa-solid fa-pen"></i> 修改</span>
+          </div>
+          <div class="cs-body">
+            <div class="cs-row"><span class="cs-key">需求标题</span><span class="cs-val" id="conf-title">—</span></div>
+            <div class="cs-row"><span class="cs-key">物料品类</span><span class="cs-val" id="conf-cat">—</span></div>
+            <div class="cs-row"><span class="cs-key">采购数量</span><span class="cs-val" id="conf-qty">—</span></div>
+            <div class="cs-row"><span class="cs-key">交付城市</span><span class="cs-val" id="conf-city">—</span></div>
+            <div class="cs-row"><span class="cs-key">交付日期</span><span class="cs-val" id="conf-date">—</span></div>
+            <div class="cs-row"><span class="cs-key">配送范围</span><span class="cs-val" id="conf-ship">—</span></div>
+            <div class="cs-row"><span class="cs-key">设计图稿</span><span class="cs-val" id="conf-file">未上传</span></div>
+          </div>
+        </div>
+
+        <!-- 报价确认 -->
+        <div class="cs-total-bar">
+          <div>
+            <div class="ctb-label">预估报价</div>
+            <div style="font-size:11px;color:var(--muted2);margin-top:3px">含物流 · 仅供参考</div>
+          </div>
+          <div class="ctb-val" id="conf-total">—</div>
+        </div>
+
+        <!-- 联系信息 -->
+        <div class="card">
+          <div class="card-title">
+            <i class="fa-solid fa-user" style="background:#F0FDF6;color:var(--green)"></i>
+            联系信息
+          </div>
+          <div class="card-sub">供应商收到需求后将通过以下方式联系你</div>
+          <div class="contact-grid">
+            <div class="fg"><label>联系人 <span style="color:#EF4444">*</span></label><input type="text" id="req-contact" value="李明华"></div>
+            <div class="fg"><label>手机号 <span style="color:#EF4444">*</span></label><input type="tel" id="req-phone" placeholder="请输入手机号"></div>
+            <div class="fg full"><label>公司名称</label><input type="text" id="req-company" value="某某品牌有限公司"></div>
+          </div>
+        </div>
+
+        <div class="step-footer">
+          <button class="btn-back" onclick="goStep(2)"><i class="fa-solid fa-arrow-left"></i> 上一步</button>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:8px">
+            <button class="btn-submit-final" onclick="submitOrder()">
+              <i class="fa-solid fa-paper-plane"></i> 确认发布需求
+            </button>
+            <div class="step-note">提交后 AI 将在 24小时内 推送供应商报价</div>
+          </div>
+        </div>
+      </div>
+    </div><!-- /wizardPanel -->
+
+  </div>
+</div>
+
+<!-- ══ BOM 弹窗 ══ -->
+<div class="bom-overlay" id="bomOverlay">
+  <div class="bom-modal">
+    <div class="bom-header">
+      <div class="bom-header-left">
+        <div class="bom-header-icon"><i class="fa-solid fa-table-list"></i></div>
+        <div>
+          <div class="bom-header-title">BOM 物料报价单</div>
+          <div class="bom-header-sub" id="bomFileName">— · 自动识别生成</div>
+        </div>
+      </div>
+      <button class="bom-close" onclick="closeBomModal()"><i class="fa-solid fa-xmark"></i></button>
+    </div>
+    <div class="bom-body" id="bomBody">
+      <div class="bom-loading" id="bomLoading">
+        <div class="bom-loading-spinner"></div>
+        <div style="font-size:13px;font-weight:600;color:var(--ink);margin-bottom:6px">AI 正在识别设计图稿…</div>
+        <div style="font-size:11px;color:var(--muted2);line-height:1.7">正在提取物料规格 · 匹配单价 · 核算报价<br>通常需要 5~15 秒</div>
+      </div>
+      <div id="bomContent" style="display:none">
+        <!-- 物料清单 -->
+        <div class="bom-section-title"><i class="fa-solid fa-list-check" style="color:var(--blue)"></i> 物料清单明细
+          <span style="font-size:10px;color:var(--muted2);font-weight:400;margin-left:6px">单价来源：物料单价明细表（含税）</span>
+        </div>
+        <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border)">
+          <table class="bom-table">
+            <thead>
+              <tr>
+                <th style="min-width:200px;text-align:left;padding-left:14px">材质规格</th>
+                <th>长(dm)</th><th>宽(dm)</th><th>数量</th>
+                <th>用量(dm²)</th><th>含税单价(¥)</th><th>小计(¥)</th><th style="width:40px"></th>
+              </tr>
+            </thead>
+            <tbody id="bomTableBody"></tbody>
+          </table>
+        </div>
+        <!-- 添加行按钮 -->
+        <button onclick="addBomRow()" style="margin-top:10px;display:flex;align-items:center;gap:6px;background:#F0FDF6;border:1.5px dashed rgba(29,185,84,0.4);color:var(--green2);font-size:12px;font-weight:700;padding:8px 16px;border-radius:8px;cursor:pointer;font-family:inherit;transition:all 0.15s" onmouseover="this.style.background='#DCFCE7'" onmouseout="this.style.background='#F0FDF6'">
+          <i class="fa-solid fa-plus"></i> 添加物料行
+        </button>
+
+        <!-- 费用汇总 -->
+        <div class="bom-section-title" style="margin-top:20px"><i class="fa-solid fa-coins" style="color:var(--orange)"></i> 费用汇总
+          <span style="font-size:10px;color:var(--muted2);font-weight:400;margin-left:6px">费率来源：BOM表模板</span>
+        </div>
+        <div class="bom-fee-grid">
+          <div class="bom-fee-item"><div><div class="bfi-label">材料费小计</div><div style="font-size:9px;color:var(--muted2);margin-top:2px">Σ(用量×含税单价)</div></div><div class="bfi-val" id="bomMatCost">¥—</div></div>
+          <div class="bom-fee-item"><div><div class="bfi-label">包装费</div><div style="font-size:9px;color:var(--muted2);margin-top:2px">材料费 × 5%</div></div><div class="bfi-val" id="bomPackFee">¥—</div></div>
+          <div class="bom-fee-item"><div><div class="bfi-label">运输费</div><div style="font-size:9px;color:var(--muted2);margin-top:2px">材料费 × 13%</div></div><div class="bfi-val" id="bomTransFee">¥—</div></div>
+          <div class="bom-fee-item"><div><div class="bfi-label">管理费</div><div style="font-size:9px;color:var(--muted2);margin-top:2px">材料费 × 15%</div></div><div class="bfi-val" id="bomManageFee">¥—</div></div>
+          <div class="bom-fee-item"><div><div class="bfi-label">利润</div><div style="font-size:9px;color:var(--muted2);margin-top:2px">材料费 × 8%</div></div><div class="bfi-val" id="bomProfitFee">¥—</div></div>
+          <div class="bom-fee-item" style="background:linear-gradient(135deg,rgba(37,99,235,0.05),rgba(37,99,235,0.02));border-color:rgba(37,99,235,0.2)">
+            <div><div class="bfi-label" style="color:#1e3a5f">税</div><div style="font-size:9px;color:var(--muted2);margin-top:2px">材料费 × 13%</div></div>
+            <div class="bfi-val" style="color:#2563EB" id="bomTaxFee">¥—</div>
+          </div>
+        </div>
+        <div class="bom-total-bar">
+          <div>
+            <div style="font-size:13px;font-weight:700;opacity:0.85">报价合计（含税）</div>
+            <div style="font-size:10px;opacity:0.6;margin-top:2px" id="bomItemCount">共 — 项物料</div>
+          </div>
+          <div style="font-size:24px;font-weight:900;letter-spacing:-0.5px" id="bomGrandTotal">¥—</div>
+        </div>
+        <div style="background:#FFFBEB;border:1px solid rgba(245,158,11,0.25);border-radius:10px;padding:12px 14px;font-size:11px;color:#92400E;line-height:1.7">
+          <i class="fa-solid fa-triangle-exclamation" style="color:#F59E0B;margin-right:6px"></i>
+          单价数据来源于<strong>物料单价明细表（含税）</strong>，费率来源于<strong>BOM表模板</strong>（包装5%·运输13%·管理15%·利润8%·税13%）。实际报价以供应商确认为准。
+        </div>
+      </div>
+    </div>
+    <div class="bom-footer">
+      <button class="btn-bom-cancel" onclick="closeBomModal()"><i class="fa-solid fa-xmark"></i> 关闭</button>
+      <button class="btn-bom-dl" id="bomDlBtn" onclick="downloadBomExcel()" style="display:none">
+        <i class="fa-solid fa-file-excel"></i> 下载 Excel BOM 表
+      </button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── 全局状态 ──
+let currentStep = 1;
+let selectedCat = '大幅面喷绘';
+let uploadedFile = null;
+let currentTier = {qty:50, price:65, ship:'全程包邮', label:'50件+ 全程包邮'};
+let addonRate = 0;
+
+// ── 初始化 ──
+window.addEventListener('load', () => {
+  const d = new Date(); d.setDate(d.getDate()+30);
+  document.getElementById('req-date').value = d.toISOString().split('T')[0];
+  updatePriceSummary();
+  updateStep1NextBtn();
+  // 侧边栏订单数
+  const orders = JSON.parse(localStorage.getItem('matprint_orders')||'[]');
+  const base = 3;
+  const total = base + orders.length;
+  document.getElementById('sb-order-badge').textContent = total;
+  // 文件删除按钮
+  document.getElementById('fileDelBtn').addEventListener('click', function(e){
+    e.stopPropagation(); removeFile();
+  });
+  // 输入监听
+  document.getElementById('req-title').addEventListener('input', updateStep1NextBtn);
+  document.getElementById('req-city').addEventListener('input', updateStep1NextBtn);
+  document.getElementById('req-qty').addEventListener('input', () => {
+    document.getElementById('qtyDisplay').textContent = document.getElementById('req-qty').value;
+    updatePriceSummary();
+  });
+});
+
+// ── 步骤切换 ──
+function goStep(n) {
+  if(n===2) {
+    const title = document.getElementById('req-title').value.trim();
+    const city  = document.getElementById('req-city').value.trim();
+    if(!title){ alert('请填写需求标题'); return; }
+    if(!city){  alert('请填写交付城市'); return; }
+  }
+  if(n===3) fillConfirm();
+  currentStep = n;
+  document.querySelectorAll('.step-panel').forEach(p => p.classList.remove('show'));
+  document.getElementById('panel'+n).classList.add('show');
+  updateStepUI(n);
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function updateStepUI(n) {
+  for(let i=1;i<=3;i++){
+    const ws = document.getElementById('ws'+i);
+    ws.classList.remove('active','done');
+    if(i < n) ws.classList.add('done');
+    else if(i === n) ws.classList.add('active');
+    if(i < n) ws.querySelector('.ws-dot').innerHTML = '<i class="fa-solid fa-check" style="font-size:12px"></i>';
+    else ws.querySelector('.ws-dot').textContent = i;
+  }
+  const pct = n===1?0 : n===2?50 : 100;
+  document.getElementById('wsTrack').style.width = pct+'%';
+}
+
+function updateStep1NextBtn(){
+  const title = document.getElementById('req-title').value.trim();
+  const city  = document.getElementById('req-city').value.trim();
+  const btn   = document.getElementById('btn1Next');
+  const note  = btn.nextElementSibling;
+  if(title && city){
+    btn.disabled = false;
+    note.style.opacity = '0';
+  } else {
+    btn.disabled = true;
+    note.style.opacity = '1';
+  }
+}
+
+// ── 品类选择 ──
+function selCat(el, name){
+  document.querySelectorAll('.cat-btn').forEach(b=>b.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedCat = name;
+}
+
+// ── 上传文件 ──
+function handleFileUpload(input){
+  if(!input.files || !input.files[0]) return;
+  const file = input.files[0];
+  uploadedFile = file;
+  const zone = document.getElementById('uploadZone');
+  const info = document.getElementById('fileInfo');
+  zone.classList.add('has-file');
+  info.classList.add('show');
+  document.getElementById('fileName').textContent = file.name;
+  const kb = file.size/1024;
+  document.getElementById('fileSize').textContent = kb>1024?(kb/1024).toFixed(1)+' MB':kb.toFixed(0)+' KB';
+  const ext = file.name.split('.').pop().toLowerCase();
+  const icon = document.getElementById('fileTypeIcon');
+  icon.className = ['jpg','jpeg','png'].includes(ext)?'ufi-icon fa-solid fa-file-image':'ufi-icon fa-solid fa-file-pdf';
+  // 激活 BOM 入口
+  const trig = document.getElementById('bomTrigger');
+  trig.classList.remove('no-file');
+  document.getElementById('bomTriggerSub').textContent = file.name + ' · 点击查看 BOM 报价单';
+  document.getElementById('bomFileName').textContent = file.name.replace(/\.[^.]+$/,'') + ' · 自动识别生成';
+}
+function removeFile(){
+  uploadedFile = null;
+  document.getElementById('fileInput').value='';
+  document.getElementById('uploadZone').classList.remove('has-file');
+  document.getElementById('fileInfo').classList.remove('show');
+  document.getElementById('bomTrigger').classList.add('no-file');
+  document.getElementById('bomTriggerSub').textContent = '上传设计图稿后可自动生成完整 BOM 报价单';
+}
+
+// ── 数量 & 报价 ──
+function changeQty(delta){
+  const inp = document.getElementById('req-qty');
+  inp.value = Math.max(1, (parseInt(inp.value)||1) + delta);
+  document.getElementById('qtyDisplay').textContent = inp.value;
+  updatePriceSummary();
+}
+function setTierQty(qty, ship, price, sample){
+  document.getElementById('req-qty').value = qty;
+  document.getElementById('qtyDisplay').textContent = qty;
+  currentTier = {qty, price, ship, label: qty+'件+ '+ship};
+  document.querySelectorAll('.tier-pill').forEach(p=>p.classList.remove('active'));
+  event.currentTarget.classList.add('active');
+  updatePriceSummary();
+}
+function updatePriceSummary(){
+  const qty   = parseInt(document.getElementById('req-qty').value)||0;
+  const unit  = document.getElementById('req-unit').value;
+  // 自动匹配阶梯
+  let tier = {qty:1, price:85, ship:'买家付运', label:'1-9件'};
+  if(qty>=100) tier = {qty:100, price:58, ship:'全程包邮', label:'100件+'};
+  else if(qty>=50) tier = {qty:50, price:65, ship:'全程包邮', label:'50-99件'};
+  else if(qty>=10) tier = {qty:10, price:72, ship:'半程包邮', label:'10-49件'};
+  currentTier = tier;
+  const base  = tier.price * qty;
+  const total = Math.round(base * (1 + addonRate));
+  document.getElementById('sum-qty').textContent   = qty + ' ' + (unit||'张');
+  document.getElementById('sum-tier').textContent  = tier.label;
+  document.getElementById('sum-price').textContent = '¥' + tier.price + ' / ' + (unit||'件');
+  document.getElementById('sum-ship').textContent  = tier.ship;
+  document.getElementById('sum-total').textContent = '¥' + total.toLocaleString();
+}
+
+// ── 工艺附加费 ──
+function toggleAddon(el, rate){
+  el.classList.toggle('sel');
+  const cb = el.querySelector('input[type=checkbox]');
+  cb.checked = !cb.checked;
+  // 重新累计
+  addonRate = 0;
+  document.querySelectorAll('.addon-item.sel').forEach(item=>{
+    const priceEl = item.querySelector('.addon-price');
+    const m = priceEl.textContent.match(/\+(\d+)%/);
+    if(m) addonRate += parseInt(m[1])/100;
+  });
+  updatePriceSummary();
+}
+
+// ── 填充确认页 ──
+function fillConfirm(){
+  const qty    = document.getElementById('req-qty').value;
+  const unit   = document.getElementById('req-unit').value;
+  const ship   = document.getElementById('req-ship');
+  const shipTxt = ship.options[ship.selectedIndex].text;
+  const total  = Math.round(currentTier.price * parseInt(qty) * (1+addonRate));
+  document.getElementById('conf-title').textContent = document.getElementById('req-title').value||'—';
+  document.getElementById('conf-cat').textContent   = selectedCat;
+  document.getElementById('conf-qty').textContent   = qty + ' ' + unit;
+  document.getElementById('conf-city').textContent  = document.getElementById('req-city').value||'—';
+  document.getElementById('conf-date').textContent  = document.getElementById('req-date').value||'—';
+  document.getElementById('conf-ship').textContent  = shipTxt;
+  document.getElementById('conf-file').textContent  = uploadedFile ? uploadedFile.name : '未上传';
+  document.getElementById('conf-total').textContent = '¥' + total.toLocaleString();
+}
+
+// ── 提交 ──
+function submitOrder(){
+  const phone = document.getElementById('req-phone').value.trim();
+  if(!phone){ alert('请填写手机号'); return; }
+  const btn = document.querySelector('.btn-submit-final');
+  btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> 提交中...';
+  btn.disabled=true;
+  setTimeout(()=>{
+    const orderId = 'ORD-2026-' + String(Date.now()).slice(-3);
+    const qty   = document.getElementById('req-qty').value;
+    const unit  = document.getElementById('req-unit').value;
+    const total = Math.round(currentTier.price * parseInt(qty) * (1+addonRate));
+    // 存入 localStorage
+    const newOrder = {
+      id: orderId,
+      title: document.getElementById('req-title').value,
+      cat: selectedCat,
+      qty: qty + ' ' + unit,
+      city: document.getElementById('req-city').value,
+      date: document.getElementById('req-date').value,
+      ship: currentTier.ship,
+      total: total,
+      status: 'matching',
+      createdAt: new Date().toLocaleDateString('zh-CN')
+    };
+    const orders = JSON.parse(localStorage.getItem('matprint_orders')||'[]');
+    orders.unshift(newOrder);
+    localStorage.setItem('matprint_orders', JSON.stringify(orders));
+    // 显示成功页
+    document.getElementById('wizardPanel').style.display='none';
+    document.getElementById('successOrderId').textContent = orderId;
+    document.getElementById('successPanel').classList.add('show');
+  }, 1500);
+}
+
+// ── BOM 弹窗 ──
+const BOM_DATA = [
+  {name:'【主背板】写真布喷绘',  mat:'写真布（高清）', l:30,w:12,qty:1,side:'单面',unitPrice:2.8},
+  {name:'【侧板L】PVC板展示',   mat:'PVC广告板(5mm)',l:6, w:24,qty:2,side:'单面',unitPrice:4.5},
+  {name:'【侧板R】PVC板展示',   mat:'PVC广告板(5mm)',l:6, w:24,qty:2,side:'单面',unitPrice:4.5},
+  {name:'【顶部横幅】UV直印',   mat:'UV直印铝板',    l:30,w:3, qty:1,side:'单面',unitPrice:12.0},
+  {name:'【地贴】防滑地贴',     mat:'防滑地贴膜',    l:20,w:15,qty:1,side:'单面',unitPrice:3.2},
+  {name:'【立柱贴】易拉宝画面', mat:'PP合成纸',      l:8, w:2, qty:4,side:'单面',unitPrice:2.1},
+  {name:'【灯箱片】透光写真',   mat:'透光写真布',    l:12,w:8, qty:2,side:'双面',unitPrice:5.6},
+];
+function openBomModal(){
+  if(document.getElementById('bomTrigger').classList.contains('no-file') && !uploadedFile){
+    alert('请先上传设计图稿，才能生成 BOM 报价单');
+    return;
+  }
+  // 若已有文件，显示加载动画模拟识别；否则直接打开空表
+  document.getElementById('bomOverlay').classList.add('show');
+  if(uploadedFile && bomRows.length === 0){
+    // 首次打开且有上传文件：模拟AI识别，预填第一行引导用户
+    document.getElementById('bomLoading').style.display='block';
+    document.getElementById('bomContent').style.display='none';
+    document.getElementById('bomDlBtn').style.display='none';
+    setTimeout(()=>{
+      // 预填一行作为示例，引导用户继续添加
+      if(bomRows.length===0) bomRows.push({mat:PRICE_LIST[0].name, l:10, w:10, qty:1, price:PRICE_LIST[0].price});
+      document.getElementById('bomLoading').style.display='none';
+      document.getElementById('bomContent').style.display='block';
+      document.getElementById('bomDlBtn').style.display='flex';
+      renderBomTable();
+    }, 1800);
+  } else {
+    document.getElementById('bomLoading').style.display='none';
+    document.getElementById('bomContent').style.display='block';
+    document.getElementById('bomDlBtn').style.display='flex';
+    renderBomTable();
+  }
+function closeBomModal(){ document.getElementById('bomOverlay').classList.remove('show'); }
+async function downloadBomExcel(){
+  if(bomRows.length === 0){ alert('请先添加物料行'); return; }
+  const btn = document.getElementById('bomDlBtn');
+  btn.innerHTML='<i class="fa-solid fa-spinner fa-spin"></i> 生成中...';
+  btn.disabled = true;
+  const projName = uploadedFile ? uploadedFile.name.replace(/\.[^.]+$/,'') : '材印达项目';
+  try {
+    const resp = await fetch('/api/generate_bom', {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ project: projName, rows: bomRows })
+    });
+    if(!resp.ok){
+      const err = await resp.json().catch(()=>({error:'服务器错误'}));
+      throw new Error(err.error || '生成失败');
+    }
+    // 触发下载
+    const blob = await resp.blob();
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = `${projName}_BOM.xlsx`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+    btn.innerHTML='<i class="fa-solid fa-check"></i> 已下载 BOM.xlsx';
+    btn.style.background='linear-gradient(135deg,var(--green),var(--green2))';
+    setTimeout(()=>{
+      btn.innerHTML='<i class="fa-solid fa-file-excel"></i> 下载 Excel BOM 表';
+      btn.style.background='';
+      btn.disabled=false;
+    }, 2500);
+  } catch(e) {
+    alert('⚠️ 下载失败：' + e.message + '\n\n请确认已部署到 Vercel，本地预览不支持 API 调用。');
+    btn.innerHTML='<i class="fa-solid fa-file-excel"></i> 下载 Excel BOM 表';
+    btn.disabled=false;
+  }
+}
+// BOM 触发器默认为无文件状态
+document.getElementById('bomTrigger').classList.add('no-file');
+
+// ── 真实物料单价库（来源：物料单价明细表.xlsx，含税单价，单位：¥/dm²）──
+const PRICE_LIST = [
+  {name:"5mm 裱画板 双面",price:0.54},{name:"5mm 裱画板 单面",price:0.24},
+  {name:"3mm 雪弗板 单面",price:0.47},{name:"3mm 雪弗板 双面",price:0.90},
+  {name:"PVC 斜纹地贴",price:0.57},{name:"5mm 雪弗板 单面",price:0.52},
+  {name:"小户外相纸",price:0.40},{name:"250g 铜版纸 双面",price:0.73},
+  {name:"小单面相纸",price:0.34},{name:"地贴",price:0.61},
+  {name:"UV超透贴 切异型（彩+白+彩三层打印）",price:1.13},
+  {name:"UV超透贴 切异型（彩+白双层打印）",price:1.00},
+  {name:"510g UV 双层印，内光无网厚刀刮布",price:1.15},
+  {name:"5mm PVC板 裱画覆哑膜，上下拼接，配胶",price:0.79},
+  {name:"相纸 单面",price:0.24},{name:"玻璃静电贴+UV印彩白彩",price:1.04},
+  {name:"3mm PVC板 背胶贴裱0.4mm水晶膜",price:1.00},
+  {name:"不干胶贴纸",price:0.53},{name:"260g 白卡纸+双面印刷",price:2.67},
+  {name:"0.4mm 背胶贴裱水晶膜 单面",price:0.60},
+  {name:"0.38mm PET UV单彩单色",price:0.56},{name:"PET 半透",price:0.50},
+  {name:"2.5mm 透明亚克力 背喷",price:1.42},
+  {name:"小UV超透/磨砂贴-（彩+白+黑+白+彩）",price:0.92},
+  {name:"0.5mm PVC板 双面印刷",price:0.58},
+  {name:"3MM高密度 安迪板 覆哑膜",price:0.48},
+  {name:"超透贴uv彩+白印刷，异形切割",price:0.82},
+  {name:"1mm厚 PVC胶片 UV印+异型雕刻",price:0.80},
+  {name:"PT-1水晶膜照片",price:1.38},
+  {name:"KV-4UV粗面强力墙贴 POP",price:0.50},
+  {name:"KV-4黑色刻字 POP",price:0.40},
+  {name:"5mm高密 PVC（UV印）氛围板 POP",price:0.90},
+  {name:"KV-4 3mm中密PVC（UV印）氛围板 POP",price:0.65},
+  {name:"KV-4UV粗面强力墙贴-异形 POP",price:0.55},
+  {name:"3mmPVC板+背胶贴裱水晶膜",price:0.80},
+  {name:"5mm高密PVC板单面印刷",price:0.70},{name:"刀刮布",price:0.84},
+  {name:"PT-双面麻布（配魔术贴）",price:0.65},
+  {name:"PT-PVC卡（异形裁切）",price:0.85},
+  {name:"可移背胶贴(国际)(≤20cm）",price:0.40},
+  {name:"地贴(≤20cm）",price:0.61},
+  {name:"可移背胶雕刻(国际)(≤20cm）",price:0.60},
+  {name:"UV超透/磨砂贴(彩+白+彩)(国际)(≤20cm）",price:1.13},
+  {name:"UV超透/磨砂贴(彩+白)(国际)(≤20cm）",price:1.00},
+  {name:"灯箱刀刮布",price:1.15},
+  {name:"PT-1活体柜底部POP3mm亚克力板背部UV+亚克力胶",price:1.52},
+  {name:"KV-3(国际)5mmPVC氛围板",price:0.73},
+  {name:"5mm中密PVC裱车贴(国际)",price:0.79},
+  {name:"PVC半透灯片",price:0.46},
+  {name:"10mm高密 PVC烤漆字",price:2.30},{name:"20mm高密 PVC烤漆字",price:2.60},
+  {name:"8mm中密 PVC板 单面印刷",price:0.80},
+  {name:"10mm中密 PVC板 单面印刷",price:1.01},
+  {name:"10mm高密 PVC板 双面印刷",price:1.31},
+  {name:"8mm中密 PVC板 双面印刷",price:1.00},
+  {name:"10mm高密 PVC板 单面印刷",price:1.15},
+  {name:"8mm高密 PVC板 单面印刷",price:0.90},
+  {name:"5mm高密 PVC板 双面印刷",price:0.85},
+  {name:"5mm中密 PVC板 双面印刷",price:0.80},
+  {name:"8mm高密 PVC板 双面印刷",price:1.07},
+  {name:"10mm中密 PVC板 双面印刷",price:1.18},
+  {name:"3mm 亚克力板 镜面",price:1.75},
+  {name:"户外背胶画面覆哑膜裱25丝PET",price:0.344},
+  {name:"相纸 单面印刷",price:0.24},
+  {name:"玻璃静电贴UV印彩白彩(≤20cm）",price:1.04},
+  {name:"3mm PVC板 背胶贴裱水晶膜",price:1.00},
+  {name:"价格数字贴",price:0.47},{name:"3mm PVC板 车贴",price:0.51},
+  {name:"玻璃防撞条",price:0.60},{name:"250g 铜版纸 单面",price:0.53},
+  {name:"背胶贴裱水晶膜(≤20cm）",price:0.60},
+  {name:"单面背胶裱5mmKT板",price:0.40},
+  {name:"KV-6堆头双面印网格布（半透）吊旗POP",price:0.75},
+  {name:"3mm 透明亚克力背喷",price:1.80},
+  {name:"5mm KT板 双面印刷",price:0.54},
+  {name:"地贴 可移背胶 单面",price:0.60},
+  {name:"小UV超透/磨砂贴-（彩+白+彩）",price:0.60}
+];
+
+// 真实费率（来源：BOM表模板）
+const FEE_RATES = {
+  pack:   {label:'包装费', rate:0.05},
+  trans:  {label:'运输费', rate:0.13},
+  manage: {label:'管理费', rate:0.15},
+  profit: {label:'利润',   rate:0.08},
+  tax:    {label:'税',     rate:0.13}
+};
+
+// 当前 BOM 物料行数据（默认空，用户从真实单价库选择）
+let bomRows = [];
+
+function buildMatOptions(selectedName){
+  return PRICE_LIST.map(p=>
+    `<option value="${p.price}" ${p.name===selectedName?'selected':''}>${p.name} — ¥${p.price}/dm²</option>`
+  ).join('');
+}
+
+function renderBomTable(){
+  const tbody = document.getElementById('bomTableBody');
+  tbody.innerHTML = '';
+  bomRows.forEach((row, idx) => {
+    const usage    = +(row.l * row.w * row.qty).toFixed(3);
+    const subtotal = +(usage * row.price).toFixed(2);
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td style="min-width:200px">
+        <select style="width:100%;font-size:11px;padding:4px 6px;border:1.5px solid #e5e7eb;border-radius:6px;font-family:inherit"
+          onchange="updateBomRow(${idx},'mat',this.options[this.selectedIndex].text,parseFloat(this.value))">
+          ${buildMatOptions(row.mat)}
+        </select>
+      </td>
+      <td><input type="number" value="${row.l}" min="0.1" step="0.1"
+        style="width:60px;text-align:center;border:1.5px solid #e5e7eb;border-radius:6px;padding:4px;font-size:12px;font-family:inherit"
+        onchange="updateBomRow(${idx},'l',parseFloat(this.value))"></td>
+      <td><input type="number" value="${row.w}" min="0.1" step="0.1"
+        style="width:60px;text-align:center;border:1.5px solid #e5e7eb;border-radius:6px;padding:4px;font-size:12px;font-family:inherit"
+        onchange="updateBomRow(${idx},'w',parseFloat(this.value))"></td>
+      <td><input type="number" value="${row.qty}" min="1"
+        style="width:50px;text-align:center;border:1.5px solid #e5e7eb;border-radius:6px;padding:4px;font-size:12px;font-family:inherit"
+        onchange="updateBomRow(${idx},'qty',parseInt(this.value))"></td>
+      <td style="color:#2563EB;font-weight:700;font-size:12px">${usage}</td>
+      <td style="color:var(--muted);font-size:12px">¥${row.price}</td>
+      <td style="font-weight:800;color:var(--ink)">¥${subtotal.toLocaleString()}</td>
+      <td><button onclick="deleteBomRow(${idx})"
+        style="border:none;background:#FEE2E2;color:#EF4444;border-radius:6px;padding:3px 8px;cursor:pointer;font-size:11px">
+        <i class="fa-solid fa-xmark"></i></button></td>
+    `;
+    tbody.appendChild(tr);
+  });
+  updateBomSummary();
+}
+
+function updateBomRow(idx, field, val, priceVal){
+  if(field==='mat'){ bomRows[idx].mat=val; bomRows[idx].price=priceVal; }
+  else bomRows[idx][field] = val;
+  renderBomTable();
+}
+function deleteBomRow(idx){
+  bomRows.splice(idx,1);
+  renderBomTable();
+}
+function addBomRow(){
+  bomRows.push({mat: PRICE_LIST[0].name, l:10, w:10, qty:1, price: PRICE_LIST[0].price});
+  renderBomTable();
+}
+
+function updateBomSummary(){
+  let matTotal = 0;
+  bomRows.forEach(row => {
+    matTotal += +(row.l * row.w * row.qty * row.price).toFixed(2);
+  });
+  matTotal = +matTotal.toFixed(2);
+  const pack   = +(matTotal * FEE_RATES.pack.rate).toFixed(2);
+  const trans  = +(matTotal * FEE_RATES.trans.rate).toFixed(2);
+  const manage = +(matTotal * FEE_RATES.manage.rate).toFixed(2);
+  const profit = +(matTotal * FEE_RATES.profit.rate).toFixed(2);
+  const tax    = +(matTotal * FEE_RATES.tax.rate).toFixed(2);
+  const grand  = +(matTotal + pack + trans + manage + profit + tax).toFixed(2);
+  document.getElementById('bomMatCost').textContent   = '¥' + matTotal.toLocaleString();
+  document.getElementById('bomPackFee').textContent   = '¥' + pack.toLocaleString();
+  document.getElementById('bomTransFee').textContent  = '¥' + trans.toLocaleString();
+  document.getElementById('bomManageFee').textContent = '¥' + manage.toLocaleString();
+  document.getElementById('bomProfitFee').textContent = '¥' + profit.toLocaleString();
+  document.getElementById('bomTaxFee').textContent    = '¥' + tax.toLocaleString();
+  document.getElementById('bomGrandTotal').textContent= '¥' + grand.toLocaleString();
+  document.getElementById('bomItemCount').textContent = '共 ' + bomRows.length + ' 项物料';
+}
+</script>
+</body>
+</html>

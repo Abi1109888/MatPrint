@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>结算中心 · 材印达 MatPrint</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --green:#1DB954;--green2:#0EA847;--ink:#0D1117;--ink2:#1C2333;--ink3:#374151;
+  --white:#fff;--bg:#F0F2F5;--card:#fff;--border:rgba(0,0,0,0.07);
+  --muted:#6B7280;--muted2:#9CA3AF;--sidebar:240px;--radius:16px;
+  --orange:#F97316;--purple:#7C3AED;--blue:#2563EB;
+}
+body{font-family:'Noto Sans SC',sans-serif;background:var(--bg);color:var(--ink);display:flex;min-height:100vh;-webkit-font-smoothing:antialiased}
+.sidebar{width:var(--sidebar);background:var(--ink2);display:flex;flex-direction:column;flex-shrink:0;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{display:flex;align-items:center;gap:10px;padding:24px 20px 20px;text-decoration:none;border-bottom:1px solid rgba(255,255,255,0.06)}
+.sb-logo-icon{width:32px;height:32px;border-radius:9px;background:var(--green);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;color:#fff;flex-shrink:0}
+.sb-logo-cn{font-size:14px;font-weight:700;color:#fff}
+.sb-logo-en{font-size:9px;color:rgba(255,255,255,0.35);letter-spacing:2px}
+.sb-user-card{padding:14px 20px;border-bottom:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:10px}
+.sb-ava{width:34px;height:34px;border-radius:50%;background:linear-gradient(135deg,var(--green),var(--green2));display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.sb-uname{font-size:13px;font-weight:700;color:#fff}
+.sb-role-tag{font-size:10px;color:rgba(255,255,255,0.4);margin-top:2px}
+.sb-group{font-size:9px;font-weight:700;color:rgba(255,255,255,0.25);letter-spacing:2px;text-transform:uppercase;padding:16px 20px 6px}
+.sb-link{display:flex;align-items:center;gap:10px;padding:9px 20px;font-size:13px;font-weight:500;color:rgba(255,255,255,0.55);text-decoration:none;transition:all 0.18s;border-left:3px solid transparent}
+.sb-link:hover{color:#fff;background:rgba(255,255,255,0.05);border-left-color:rgba(255,255,255,0.2)}
+.sb-link.active{color:#fff;background:rgba(29,185,84,0.12);border-left-color:var(--green)}
+.si{width:16px;text-align:center;flex-shrink:0}
+.badge{margin-left:auto;background:#EF4444;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:8px}
+.sb-bottom{margin-top:auto;padding:16px 20px;border-top:1px solid rgba(255,255,255,0.06)}
+.sb-exit{display:flex;align-items:center;gap:8px;font-size:12px;color:rgba(255,255,255,0.35);text-decoration:none;transition:color 0.18s}
+.sb-exit:hover{color:#EF4444}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:56px;background:rgba(255,255,255,0.92);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:100}
+.topbar-breadcrumb{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.topbar-breadcrumb strong{color:var(--ink)}
+.sep{opacity:0.3}
+.topbar-right{display:flex;align-items:center;gap:10px}
+.btn-primary{display:flex;align-items:center;gap:6px;background:var(--green);border:none;color:#fff;font-size:12px;font-weight:700;padding:8px 18px;border-radius:9px;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-primary:hover{background:var(--green2)}
+.btn-ghost{display:flex;align-items:center;gap:6px;background:transparent;border:1.5px solid var(--border);color:var(--muted);font-size:12px;font-weight:600;padding:7px 16px;border-radius:9px;cursor:pointer;font-family:inherit;transition:all 0.2s}
+.btn-ghost:hover{border-color:var(--ink);color:var(--ink)}
+.content{padding:24px 28px;flex:1}
+
+/* ── 账户卡片区 ── */
+.account-grid{display:grid;grid-template-columns:1.2fr 1fr 1fr 1fr;gap:16px;margin-bottom:24px}
+
+/* 主余额卡 */
+.balance-card{background:linear-gradient(135deg,var(--ink2) 0%,#1a2744 60%,#0D3320 100%);border-radius:20px;padding:24px;color:#fff;position:relative;overflow:hidden;grid-row:1;display:flex;flex-direction:column;justify-content:space-between}
+.balance-card::before{content:'';position:absolute;top:-40px;right:-40px;width:180px;height:180px;border-radius:50%;background:rgba(29,185,84,0.12)}
+.balance-card::after{content:'';position:absolute;bottom:-60px;left:20%;width:200px;height:200px;border-radius:50%;background:rgba(37,99,235,0.08)}
+.bc-tag{display:inline-flex;align-items:center;gap:5px;background:rgba(29,185,84,0.15);border:1px solid rgba(29,185,84,0.25);color:rgba(255,255,255,0.8);font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;margin-bottom:12px;letter-spacing:0.5px}
+.bc-label{font-size:10px;color:rgba(255,255,255,0.4);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.bc-amount{font-size:36px;font-weight:900;letter-spacing:-2px;line-height:1;margin-bottom:4px}
+.bc-amount small{font-size:16px;font-weight:500;opacity:0.6}
+.bc-sub{font-size:11px;color:rgba(255,255,255,0.4);margin-bottom:18px}
+.bc-actions{display:flex;gap:8px;position:relative;z-index:1}
+.bc-btn{font-size:12px;font-weight:700;padding:8px 18px;border-radius:9px;cursor:pointer;font-family:inherit;transition:all 0.2s;border:none}
+.bc-btn-green{background:var(--green);color:#fff}
+.bc-btn-green:hover{background:var(--green2)}
+.bc-btn-glass{background:rgba(255,255,255,0.1);color:#fff;border:1px solid rgba(255,255,255,0.2)!important;border:none}
+.bc-btn-glass:hover{background:rgba(255,255,255,0.18)}
+
+/* 统计小卡 */
+.stat-mini{background:var(--card);border-radius:16px;border:1px solid var(--border);padding:18px 20px;box-shadow:0 2px 8px rgba(0,0,0,0.04);position:relative;overflow:hidden}
+.stat-mini::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.sm-orange::before{background:linear-gradient(90deg,#F97316,#FB923C)}
+.sm-blue::before{background:linear-gradient(90deg,#2563EB,#60A5FA)}
+.sm-purple::before{background:linear-gradient(90deg,#7C3AED,#A78BFA)}
+.sm-label{font-size:10px;color:var(--muted2);font-weight:600;margin-bottom:8px;display:flex;align-items:center;gap:5px}
+.sm-num{font-size:26px;font-weight:900;color:var(--ink);letter-spacing:-1px;line-height:1}
+.sm-num span{font-size:13px;font-weight:500;color:var(--muted);letter-spacing:0}
+.sm-change{font-size:10px;font-weight:700;margin-top:5px;display:flex;align-items:center;gap:3px}
+.up{color:#10B981}.down{color:#EF4444}.neu{color:var(--muted2)}
+
+/* ── T+7 结算进度 ── */
+.settle-pipeline{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:22px 24px;margin-bottom:20px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.sp-title{font-size:14px;font-weight:700;color:var(--ink);margin-bottom:18px;display:flex;align-items:center;gap:8px}
+.sp-title i{color:var(--green)}
+.pipeline-track{display:flex;align-items:center;gap:0;margin-bottom:20px}
+.pt-step{flex:1;text-align:center;position:relative}
+.pt-step::after{content:'';position:absolute;top:16px;left:50%;width:100%;height:2px;background:var(--border);z-index:0}
+.pt-step:last-child::after{display:none}
+.pt-step.done::after{background:var(--green)}
+.pt-dot{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;margin:0 auto 8px;position:relative;z-index:1;border:2px solid var(--border);background:#fff;color:var(--muted2);transition:all 0.3s}
+.pt-step.done .pt-dot{background:var(--green);border-color:var(--green);color:#fff}
+.pt-step.active .pt-dot{background:#fff;border-color:var(--green);color:var(--green);box-shadow:0 0 0 4px rgba(29,185,84,0.15)}
+.pt-label{font-size:10px;font-weight:600;color:var(--muted2)}
+.pt-step.done .pt-label{color:var(--green)}
+.pt-step.active .pt-label{color:var(--ink);font-weight:700}
+.pt-time{font-size:9px;color:var(--muted2);margin-top:2px}
+/* 结算明细行 */
+.settle-item{display:flex;align-items:center;gap:14px;padding:12px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.settle-item:last-child{border-bottom:none}
+.si-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.si-info{flex:1}
+.si-name{font-size:12px;font-weight:700;color:var(--ink);margin-bottom:2px}
+.si-meta{font-size:10px;color:var(--muted2)}
+.si-progress{flex:1;max-width:160px}
+.si-bar{height:4px;background:#F0F0F0;border-radius:2px;overflow:hidden;margin-bottom:3px}
+.si-fill{height:100%;background:var(--green);border-radius:2px;transition:width 1s ease}
+.si-prog-label{font-size:9px;color:var(--muted2);display:flex;justify-content:space-between}
+.si-amount{font-size:13px;font-weight:800;color:var(--ink);text-align:right;min-width:70px}
+.si-status{font-size:10px;font-weight:700;padding:3px 9px;border-radius:8px;flex-shrink:0}
+.s-settling{background:#DBEAFE;color:#1D4ED8}
+.s-pending{background:#FEF3C7;color:#92400E}
+.s-done{background:#D1FAE5;color:#065F46}
+.s-hold{background:#EDE9FE;color:#6D28D9}
+
+/* ── 主布局 ── */
+.settle-layout{display:grid;grid-template-columns:1fr 320px;gap:20px}
+.card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden}
+.card-head{padding:16px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+.card-title{font-size:14px;font-weight:700;color:var(--ink);display:flex;align-items:center;gap:8px}
+.card-title i{color:var(--green)}
+.card-action{font-size:12px;color:var(--green2);font-weight:600;cursor:pointer;display:flex;align-items:center;gap:4px;text-decoration:none}
+
+/* 筛选 */
+.filter-bar{padding:12px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.ftab{font-size:11px;font-weight:600;padding:5px 12px;border-radius:16px;border:1.5px solid var(--border);background:#fff;color:var(--muted);cursor:pointer;transition:all 0.18s;font-family:inherit}
+.ftab.active{background:var(--ink);border-color:var(--ink);color:#fff}
+.filter-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.export-btn{font-size:11px;font-weight:600;padding:5px 12px;border-radius:8px;border:1.5px solid var(--border);background:#fff;color:var(--muted);cursor:pointer;font-family:inherit;transition:all 0.18s;display:flex;align-items:center;gap:5px}
+.export-btn:hover{border-color:var(--green);color:var(--green)}
+
+/* 账单表格 */
+table{width:100%;border-collapse:collapse}
+th{font-size:10px;font-weight:700;color:var(--muted2);text-transform:uppercase;letter-spacing:0.5px;padding:10px 14px;text-align:left;border-bottom:1.5px solid var(--border);white-space:nowrap}
+td{font-size:12px;color:var(--ink3);padding:13px 14px;border-bottom:1px solid rgba(0,0,0,0.04)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#FAFBFC}
+.t-id{font-weight:700;color:var(--ink);font-family:monospace;font-size:11px}
+.t-amount{font-size:13px;font-weight:800;color:var(--ink)}
+.t-tax{font-size:10px;color:var(--muted2)}
+.t-status{font-size:10px;font-weight:700;padding:3px 10px;border-radius:8px;display:inline-block;white-space:nowrap}
+.t-paid{background:#D1FAE5;color:#065F46}
+.t-settling{background:#DBEAFE;color:#1D4ED8}
+.t-pending{background:#FEF3C7;color:#92400E}
+.t-action{font-size:11px;font-weight:600;color:var(--green2);cursor:pointer;text-decoration:none;white-space:nowrap}
+.t-action:hover{color:var(--green)}
+
+/* ── 右侧面板 ── */
+/* 开票申请 */
+.invoice-card{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);box-shadow:0 2px 8px rgba(0,0,0,0.04);overflow:hidden;margin-bottom:16px}
+.ic-head{background:linear-gradient(135deg,#1a2744,var(--ink2));padding:18px 20px;color:#fff}
+.ic-title{font-size:14px;font-weight:800;margin-bottom:4px;display:flex;align-items:center;gap:8px}
+.ic-sub{font-size:11px;color:rgba(255,255,255,0.5)}
+.ic-body{padding:18px 20px}
+.ic-row{margin-bottom:14px}
+.ic-label{font-size:10px;font-weight:700;color:var(--muted2);letter-spacing:0.5px;text-transform:uppercase;margin-bottom:6px}
+.ic-select{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-size:12px;font-family:inherit;outline:none;transition:border 0.2s;cursor:pointer}
+.ic-select:focus{border-color:var(--green)}
+.ic-input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:9px 12px;font-size:12px;font-family:inherit;outline:none;transition:border 0.2s}
+.ic-input:focus{border-color:var(--green)}
+/* 税目说明 */
+.tax-tip{background:#F0FDF6;border:1px solid rgba(29,185,84,0.2);border-radius:9px;padding:10px 12px;margin-bottom:14px;font-size:11px;color:var(--ink3);line-height:1.6}
+.tax-tip strong{color:var(--green);font-weight:700}
+/* 可开票金额 */
+.invoiceable{background:#F8FAFC;border-radius:10px;padding:12px 14px;margin-bottom:14px;display:flex;align-items:center;justify-content:space-between}
+.inv-label{font-size:11px;color:var(--muted2)}
+.inv-amount{font-size:18px;font-weight:900;color:var(--ink);letter-spacing:-0.5px}
+.ic-submit{width:100%;background:linear-gradient(135deg,var(--green),var(--green2));border:none;color:#fff;font-size:13px;font-weight:700;padding:11px;border-radius:10px;cursor:pointer;font-family:inherit;transition:all 0.2s;display:flex;align-items:center;justify-content:center;gap:7px}
+.ic-submit:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(29,185,84,0.35)}
+
+/* 结算说明 */
+.settle-rules{background:var(--card);border-radius:var(--radius);border:1px solid var(--border);padding:18px 20px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.sr-title{font-size:13px;font-weight:700;color:var(--ink);margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.sr-item{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid rgba(0,0,0,0.04)}
+.sr-item:last-child{border-bottom:none}
+.sr-badge{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex-shrink:0;margin-top:1px}
+.sr-text{font-size:12px;color:var(--ink3);line-height:1.7;flex:1}
+.sr-text strong{color:var(--ink);font-weight:700}
+
+/* 质保金 */
+.deposit-card{background:linear-gradient(135deg,#EDE9FE,#DDD6FE);border-radius:14px;padding:16px 18px;margin-top:14px;border:1px solid rgba(124,58,237,0.15)}
+.dep-label{font-size:10px;font-weight:700;color:#6D28D9;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+.dep-amount{font-size:22px;font-weight:900;color:#4C1D95;letter-spacing:-0.5px;margin-bottom:4px}
+.dep-bar{height:5px;background:rgba(124,58,237,0.15);border-radius:3px;overflow:hidden;margin-bottom:6px}
+.dep-fill{height:100%;background:linear-gradient(90deg,#7C3AED,#A78BFA);border-radius:3px;width:68%}
+.dep-hint{font-size:10px;color:#6D28D9;opacity:0.7}
+</style>
+</head>
+<body>
+<aside class="sidebar">
+  <a href="landing.html" class="sb-logo">
+    <div class="sb-logo-icon">M</div>
+    <div><div class="sb-logo-cn">材印达</div><div class="sb-logo-en">MatPrint</div></div>
+  </a>
+  <div class="sb-user-card">
+    <div class="sb-ava">李</div>
+    <div><div class="sb-uname">李明华</div><div class="sb-role-tag"><i class="fa-solid fa-circle-check" style="font-size:8px"></i> 品牌方账号</div></div>
+  </div>
+  <div class="sb-group">社区</div>
+  <a href="community.html" class="sb-link"><i class="si fa-solid fa-fire" style="color:#F97316"></i> 创意社区</a>
+  <div class="sb-group">工作台</div>
+  <a href="brand-dashboard.html" class="sb-link"><i class="si fa-solid fa-gauge-high"></i> 控制台</a>
+  <a href="dispatch.html" class="sb-link"><i class="si fa-solid fa-paper-plane" style="color:#F97316"></i> 派单中心<span class="badge">5</span></a>
+  <a href="new-order.html" class="sb-link"><i class="si fa-solid fa-circle-plus"></i> 发布需求</a>
+  <a href="order-list.html" class="sb-link"><i class="si fa-solid fa-list-check"></i> 我的订单<span class="badge">3</span></a>
+  <div class="sb-group">采购</div>
+  <a href="supplier-market.html" class="sb-link"><i class="si fa-solid fa-store"></i> 供应商市场</a>
+  <a href="#" class="sb-link"><i class="si fa-solid fa-heart"></i> 收藏供应商</a>
+  <a href="#" class="sb-link"><i class="si fa-solid fa-file-invoice-dollar"></i> 报价管理</a>
+  <div class="sb-group">财务</div>
+  <a href="settlement.html" class="sb-link active"><i class="si fa-solid fa-wallet"></i> 结算中心</a>
+  <a href="#" class="sb-link"><i class="si fa-solid fa-receipt"></i> 发票管理</a>
+  <div class="sb-group">账号</div>
+  <a href="#" class="sb-link"><i class="si fa-solid fa-gear"></i> 账号设置</a>
+  <div class="sb-bottom">
+    <a href="login.html" class="sb-exit"><i class="fa-solid fa-right-from-bracket"></i> 退出登录</a>
+  </div>
+</aside>
+
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-breadcrumb">
+      <span>材印达</span><span class="sep">/</span>
+      <a href="brand-dashboard.html" style="color:var(--muted);text-decoration:none">工作台</a>
+      <span class="sep">/</span><strong>结算中心</strong>
+    </div>
+    <div class="topbar-right">
+      <button class="btn-ghost" onclick="alert('导出账单：支持 Excel / PDF 格式')"><i class="fa-solid fa-download"></i> 导出账单</button>
+      <button class="btn-primary" onclick="document.getElementById('invoiceModal').classList.add('show')"><i class="fa-solid fa-file-invoice"></i> 申请开票</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- 账户卡片区 -->
+    <div class="account-grid">
+      <div class="balance-card">
+        <div>
+          <div class="bc-tag"><i class="fa-solid fa-wallet" style="font-size:9px"></i> 平台账户</div>
+          <div class="bc-label">可用余额</div>
+          <div class="bc-amount"><small>¥</small> 12,680</div>
+          <div class="bc-sub">账号：MP-B-20250001 · 某某品牌有限公司</div>
+        </div>
+        <div class="bc-actions">
+          <button class="bc-btn bc-btn-green" onclick="alert('充值：请联系 finance@matprint.cn')"><i class="fa-solid fa-plus"></i> 充值</button>
+          <button class="bc-btn bc-btn-glass" onclick="alert('提现：请联系 finance@matprint.cn')"><i class="fa-solid fa-arrow-up"></i> 提现</button>
+        </div>
+      </div>
+      <div class="stat-mini sm-orange">
+        <div class="sm-label"><i class="fa-solid fa-clock" style="color:#F97316"></i> 待结算金额</div>
+        <div class="sm-num">5.07 <span>万</span></div>
+        <div class="sm-change neu">3 笔进行中</div>
+      </div>
+      <div class="stat-mini sm-blue">
+        <div class="sm-label"><i class="fa-solid fa-check-circle" style="color:#2563EB"></i> 本月已结算</div>
+        <div class="sm-num">12.8 <span>万</span></div>
+        <div class="sm-change up"><i class="fa-solid fa-arrow-trend-up"></i> 同比 +18%</div>
+      </div>
+      <div class="stat-mini sm-purple">
+        <div class="sm-label"><i class="fa-solid fa-file-invoice" style="color:#7C3AED"></i> 待开票金额</div>
+        <div class="sm-num">8.64 <span>万</span></div>
+        <div class="sm-change neu">可申请开票</div>
+      </div>
+    </div>
+
+    <!-- T+7 结算进度 -->
+    <div class="settle-pipeline">
+      <div class="sp-title"><i class="fa-solid fa-timeline"></i> T+7 结算进度追踪</div>
+      <div style="font-size:11px;color:var(--muted2);margin-bottom:16px">ORD-2025-003 · UV印刷礼盒包装 × 500套 · ¥9,600</div>
+      <div class="pipeline-track">
+        <div class="pt-step done">
+          <div class="pt-dot"><i class="fa-solid fa-check" style="font-size:11px"></i></div>
+          <div class="pt-label">确认收货</div>
+          <div class="pt-time">06/28 14:30</div>
+        </div>
+        <div class="pt-step done">
+          <div class="pt-dot"><i class="fa-solid fa-check" style="font-size:11px"></i></div>
+          <div class="pt-label">平台审核</div>
+          <div class="pt-time">D+1 完成</div>
+        </div>
+        <div class="pt-step active">
+          <div class="pt-dot"><i class="fa-solid fa-spinner fa-spin" style="font-size:11px"></i></div>
+          <div class="pt-label">财务复核</div>
+          <div class="pt-time">预计 D+3</div>
+        </div>
+        <div class="pt-step">
+          <div class="pt-dot">4</div>
+          <div class="pt-label">打款到账</div>
+          <div class="pt-time">预计 07/05</div>
+        </div>
+        <div class="pt-step">
+          <div class="pt-dot">5</div>
+          <div class="pt-label">结算完成</div>
+          <div class="pt-time">T+7</div>
+        </div>
+      </div>
+      <!-- 进行中结算列表 -->
+      <div style="border-top:1px solid var(--border);padding-top:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--muted2);margin-bottom:10px;letter-spacing:0.5px">进行中的结算</div>
+        <div class="settle-item">
+          <div class="si-icon" style="background:#EDE9FE">📦</div>
+          <div class="si-info">
+            <div class="si-name">UV印刷礼盒包装 × 500套</div>
+            <div class="si-meta">ORD-2025-003 · 东莞彩印科技 · 确认收货：06/28</div>
+          </div>
+          <div class="si-progress">
+            <div class="si-bar"><div class="si-fill" style="width:60%"></div></div>
+            <div class="si-prog-label"><span>D+3/T+7</span><span>60%</span></div>
+          </div>
+          <div class="si-amount">¥9,600</div>
+          <div class="si-status s-settling">结算中</div>
+        </div>
+        <div class="settle-item">
+          <div class="si-icon" style="background:#DBEAFE">🖨️</div>
+          <div class="si-info">
+            <div class="si-name">大型喷绘背景板 × 8张</div>
+            <div class="si-meta">ORD-2025-001 · 深圳星辰印刷 · 预计完成：06/18</div>
+          </div>
+          <div class="si-progress">
+            <div class="si-bar"><div class="si-fill" style="width:20%;background:#F59E0B"></div></div>
+            <div class="si-prog-label"><span>生产中</span><span>20%</span></div>
+          </div>
+          <div class="si-amount">¥12,800</div>
+          <div class="si-status s-pending">待验收</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 主布局 -->
+    <div class="settle-layout">
+      <!-- 账单明细 -->
+      <div class="card">
+        <div class="card-head">
+          <div class="card-title"><i class="fa-solid fa-list"></i> 账单明细</div>
+          <a class="card-action" onclick="alert('导出全部账单')"><i class="fa-solid fa-download"></i> 导出</a>
+        </div>
+        <div class="filter-bar">
+          <button class="ftab active" onclick="switchTab(this)">全部</button>
+          <button class="ftab" onclick="switchTab(this)">待结算</button>
+          <button class="ftab" onclick="switchTab(this)">结算中</button>
+          <button class="ftab" onclick="switchTab(this)">已结算</button>
+          <button class="ftab" onclick="switchTab(this)">已开票</button>
+          <div class="filter-right">
+            <select style="border:1.5px solid var(--border);border-radius:8px;padding:5px 10px;font-size:11px;font-family:inherit;outline:none;color:var(--ink)">
+              <option>2025年06月</option>
+              <option>2025年05月</option>
+              <option>2025年04月</option>
+            </select>
+          </div>
+        </div>
+        <div style="overflow-x:auto">
+          <table>
+            <thead>
+              <tr>
+                <th>订单编号</th>
+                <th>物料名称</th>
+                <th>供应商</th>
+                <th>税目</th>
+                <th>税率</th>
+                <th>金额（含税）</th>
+                <th>完成日期</th>
+                <th>结算状态</th>
+                <th>操作</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="t-id">ORD-2025-003</td>
+                <td>UV印刷礼盒包装 × 500套</td>
+                <td>东莞彩印科技</td>
+                <td><span style="font-size:10px;background:#EDE9FE;color:#6D28D9;padding:2px 7px;border-radius:5px">货物销售</span></td>
+                <td>13%</td>
+                <td class="t-amount">¥9,600<div class="t-tax">税额 ¥1,106</div></td>
+                <td>-</td>
+                <td><span class="t-status t-settling">结算中</span></td>
+                <td><a class="t-action" onclick="alert('查看结算进度')">查看进度</a></td>
+              </tr>
+              <tr>
+                <td class="t-id">ORD-2025-002</td>
+                <td>展台搭建 3×6m</td>
+                <td>广州展博展示</td>
+                <td><span style="font-size:10px;background:#DBEAFE;color:#1D4ED8;padding:2px 7px;border-radius:5px">建筑服务</span></td>
+                <td>9%</td>
+                <td class="t-amount">¥28,500<div class="t-tax">税额 ¥2,349</div></td>
+                <td>-</td>
+                <td><span class="t-status t-pending">待验收</span></td>
+                <td><a class="t-action" onclick="alert('查看订单详情')">查看订单</a></td>
+              </tr>
+              <tr>
+                <td class="t-id">ORD-2025-004</td>
+                <td>文化墙制作 × 3面</td>
+                <td>北京创艺广告</td>
+                <td><span style="font-size:10px;background:#D1FAE5;color:#065F46;padding:2px 7px;border-radius:5px">文化创意</span></td>
+                <td>6%</td>
+                <td class="t-amount">¥15,200<div class="t-tax">税额 ¥861</div></td>
+                <td>2025-05-20</td>
+                <td><span class="t-status t-paid">已结算</span></td>
+                <td><a class="t-action" onclick="alert('申请开票')">申请开票</a></td>
+              </tr>
+              <tr>
+                <td class="t-id">ORD-2025-005</td>
+                <td>易拉宝 × 50支</td>
+                <td>深圳星辰印刷</td>
+                <td><span style="font-size:10px;background:#EDE9FE;color:#6D28D9;padding:2px 7px;border-radius:5px">货物销售</span></td>
+                <td>13%</td>
+                <td class="t-amount">¥4,250<div class="t-tax">税额 ¥490</div></td>
+                <td>2025-05-20</td>
+                <td><span class="t-status t-paid">已结算</span></td>
+                <td><a class="t-action" onclick="alert('申请开票')">申请开票</a></td>
+              </tr>
+              <tr>
+                <td class="t-id">ORD-2025-006</td>
+                <td>促销堆头物料 × 200套</td>
+                <td>上海优印科技</td>
+                <td><span style="font-size:10px;background:#EDE9FE;color:#6D28D9;padding:2px 7px;border-radius:5px">货物销售</span></td>
+                <td>13%</td>
+                <td class="t-amount">¥8,900<div class="t-tax">税额 ¥1,026</div></td>
+                <td>2025-04-15</td>
+                <td><span class="t-status t-paid" style="background:#F0FDF6;color:#065F46;border:1px solid rgba(16,185,129,0.2)">已开票</span></td>
+                <td><a class="t-action" onclick="alert('下载发票')"><i class="fa-solid fa-download"></i> 下载发票</a></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- 右侧面板 -->
+      <div>
+        <!-- 开票申请 -->
+        <div class="invoice-card">
+          <div class="ic-head">
+            <div class="ic-title"><i class="fa-solid fa-file-invoice"></i> 申请开票</div>
+            <div class="ic-sub">系统自动识别税目，确保开票合规</div>
+          </div>
+          <div class="ic-body">
+            <div class="invoiceable">
+              <div class="inv-label">可开票金额</div>
+              <div class="inv-amount">¥86,400</div>
+            </div>
+
+            <div class="ic-row">
+              <div class="ic-label">发票类型</div>
+              <select class="ic-select" onchange="updateTaxTip(this)">
+                <option value="special">增值税专用发票（可抵扣）</option>
+                <option value="normal">增值税普通发票</option>
+                <option value="electronic">电子普通发票</option>
+              </select>
+            </div>
+
+            <div class="tax-tip" id="taxTip">
+              <strong>税目自动识别：</strong>纯印刷物料 → 货物销售13%；含设计服务 → 文化创意服务6%；展台搭建 → 建筑服务9%
+            </div>
+
+            <div class="ic-row">
+              <div class="ic-label">开票抬头</div>
+              <input type="text" class="ic-input" value="某某品牌有限公司">
+            </div>
+            <div class="ic-row">
+              <div class="ic-label">纳税人识别号</div>
+              <input type="text" class="ic-input" placeholder="91XXXXXXXXXXXXXXXXXX">
+            </div>
+            <div class="ic-row">
+              <div class="ic-label">开票金额</div>
+              <input type="text" class="ic-input" value="¥86,400.00">
+            </div>
+            <div class="ic-row">
+              <div class="ic-label">收票邮箱</div>
+              <input type="email" class="ic-input" placeholder="finance@yourcompany.com">
+            </div>
+            <button class="ic-submit" onclick="alert('开票申请已提交！\n\n预计1-3个工作日内开具，发票将发送至您的邮箱。\n\n如有问题请联系：finance@matprint.cn')">
+              <i class="fa-solid fa-paper-plane"></i> 提交开票申请
+            </button>
+          </div>
+        </div>
+
+        <!-- 结算规则 -->
+        <div class="settle-rules">
+          <div class="sr-title"><i class="fa-solid fa-circle-info" style="color:var(--green)"></i> 结算规则说明</div>
+          <div class="sr-item">
+            <div class="sr-badge" style="background:#D1FAE5;color:#065F46">T+7</div>
+            <div class="sr-text">验收确认后 <strong>7个工作日</strong> 内完成结算，资金直接打入供应商账户</div>
+          </div>
+          <div class="sr-item">
+            <div class="sr-badge" style="background:#DBEAFE;color:#1D4ED8">30天</div>
+            <div class="sr-text">质保金保留 <strong>30天</strong>，期满无质量问题自动释放</div>
+          </div>
+          <div class="sr-item">
+            <div class="sr-badge" style="background:#FEF3C7;color:#92400E">先赔</div>
+            <div class="sr-text">平台提供 <strong>先行赔付</strong>，质量问题最高赔付订单金额 <strong>100%</strong></div>
+          </div>
+          <div class="sr-item">
+            <div class="sr-badge" style="background:#EDE9FE;color:#6D28D9">月结</div>
+            <div class="sr-text">合作满3个月的品牌方可申请 <strong>月结账期</strong>，最长 <strong>Net 30</strong></div>
+          </div>
+
+          <!-- 质保金 -->
+          <div class="deposit-card">
+            <div class="dep-label">质保金余额</div>
+            <div class="dep-amount">¥21,500</div>
+            <div class="dep-bar"><div class="dep-fill"></div></div>
+            <div class="dep-hint">最近释放：¥5,000 将于 30天后 自动释放</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(btn){
+  document.querySelectorAll('.ftab').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+function updateTaxTip(sel){
+  const tip = document.getElementById('taxTip');
+  if(sel.value==='special'){
+    tip.innerHTML='<strong>专票说明：</strong>需提供完整的纳税人识别号及开户行信息，可用于进项税额抵扣。系统自动按税目分开开具。';
+  } else {
+    tip.innerHTML='<strong>税目自动识别：</strong>纯印刷物料 → 货物销售13%；含设计服务 → 文化创意服务6%；展台搭建 → 建筑服务9%';
+  }
+}
+// 进度条动画
+window.addEventListener('load',()=>{
+  document.querySelectorAll('.si-fill').forEach(el=>{
+    const w=el.style.width; el.style.width='0';
+    setTimeout(()=>{ el.style.width=w; },300);
+  });
+});
+</script>
+</body>
+</html>
